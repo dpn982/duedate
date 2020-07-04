@@ -1,8 +1,10 @@
 import 'dart:convert';
 
-Payment paymentFromJson(String str) => Payment.fromJson(json.decode(str));
+import 'package:flutter/cupertino.dart';
 
-String paymentToJson(Payment data) => json.encode(data.toJson());
+Payment paymentFromJson(String str) => Payment.fromMap(json.decode(str));
+
+String paymentToJson(Payment data) => json.encode(data.toMap());
 
 class Payment {
   Payment({
@@ -16,6 +18,7 @@ class Payment {
     this.frequency,
     this.units,
     this.color,
+    this.icon,
     this.paymentMethod,
     this.interestPercentage,
     this.compoundedFrequency,
@@ -33,7 +36,8 @@ class Payment {
   bool recurring;
   int frequency;
   String units;
-  String color;
+  Color color;
+  IconData icon;
   String paymentMethod;
   int interestPercentage;
   String compoundedFrequency;
@@ -51,7 +55,8 @@ class Payment {
     recurring: json["recurring"],
     frequency: json["frequency"],
     units: json["units"],
-    color: json["color"],
+    color: Color(int.parse(json["color"])),
+    icon: IconData(int.parse(json["icon"]), fontFamily: 'MaterialIcons'),
     paymentMethod: json["payment_method"],
     interestPercentage: json["interest_percentage"],
     compoundedFrequency: json["compounded_frequency"],
@@ -70,7 +75,8 @@ class Payment {
     "recurring": recurring,
     "frequency": frequency,
     "units": units,
-    "color": color,
+    "color": color.value,
+    "icon": icon.codePoint,
     "payment_method": paymentMethod,
     "interest_percentage": interestPercentage,
     "compounded_frequency": compoundedFrequency,

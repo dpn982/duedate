@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import 'package:duedate/PaymentModel.dart';
+import 'package:duedate/models/PaymentModel.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DBProvider {
@@ -53,7 +53,7 @@ class DBProvider {
   }
 
   void _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    await _database.execute("");
+    //await _database.execute("");
   }
 
   newPayment(Payment newPayment) async {
@@ -65,6 +65,6 @@ class DBProvider {
   getPayment(int id) async {
     final db = await database;
     var res = await db.query("Payment", where: "id = ?", whereArgs: [id]);
-    return res.isNotEmpty ? Payment.fromMap(res.first) : Null ;
+    return res.isNotEmpty ? Payment.fromMap(res.first) : Null;
   }
 }
