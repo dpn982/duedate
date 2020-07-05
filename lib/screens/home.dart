@@ -9,6 +9,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final payments = [Payment(id: 1, name: "mobile", description: "mobile bill", amount: "100.00", createdDate: "20200625", dueDate: "20200703", recurring: true, frequency: 1, units: "MONTHS", color: Colors.green, icon: Icons.phone_android, paymentMethod: "visa", interestPercentage: 0, compoundedFrequency: "0", notes: "", enabled: true, hidden: false)];
 
   final SlidableController slidableController = SlidableController();
 
@@ -41,11 +42,11 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         leading: Icon(Icons.calendar_today),
         title: Text('Due Date'),
-        backgroundColor: Colors.deepOrange,
+        //backgroundColor: Colors.deepOrange,
       ),
       body: mainListView(context),
       bottomNavigationBar: BottomAppBar(
-        color: Colors.deepOrange,
+        //color: Colors.deepOrange,
         shape: const CircularNotchedRectangle(),
         child: Container(
           height: 50.0,
@@ -53,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.deepPurple,
+        //backgroundColor: Colors.deepPurple,
         onPressed: _doAction,
         tooltip: 'Do Action',
         child: Icon(Icons.add),
@@ -62,8 +63,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget mainListView(BuildContext context) {
-    final payments = [Payment(id: 1, name: "mobile", description: "mobile bill", amount: "100.00", createdDate: "20200625", dueDate: "20200703", recurring: true, frequency: 1, units: "months", color: Colors.deepPurple, icon: Icons.phone_android, paymentMethod: "visa", interestPercentage: 0, compoundedFrequency: "0", notes: "", enabled: true, hidden: false)];
-
     return ListView.builder(
       itemCount: payments.length,
       itemBuilder: (context, index) {
@@ -81,14 +80,21 @@ class _HomeScreenState extends State<HomeScreen> {
               child: ListTile(
                 leading: Icon(payments[index].icon),
                 title: Text(payments[index].name),
+                subtitle: Text("Due: ${payments[index].dueDate}"),
                 trailing: Icon(Icons.keyboard_arrow_right),
-                onTap: () {
-                  Navigator.push(
+                onTap: () async {
+                  final payment = await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => EditScreen(payment: payments[index]),
                     ),
                   );
+
+                  setState(() {
+                    if (payment != null) {
+                      payments[index] = payment;
+                    }
+                  });
                 },
               ),
             ),
