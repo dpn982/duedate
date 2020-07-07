@@ -1,10 +1,10 @@
 import 'dart:convert';
-
+import 'package:flutter/rendering.dart';
 import 'package:flutter/cupertino.dart';
 
-Payment paymentFromJson(String str) => Payment.fromMap(json.decode(str));
+Payment paymentFromJson(String str) => Payment.fromJson(json.decode(str));
 
-String paymentToJson(Payment data) => json.encode(data.toMap());
+String paymentToJson(Payment data) => json.encode(data.toJson());
 
 class Payment {
   Payment({
@@ -16,7 +16,7 @@ class Payment {
     this.dueDate,
     this.recurring,
     this.frequency,
-    this.units,
+    this.frequencyUnits,
     this.color,
     this.icon,
     this.paymentMethod,
@@ -30,12 +30,12 @@ class Payment {
   int id;
   String name;
   String description;
-  String amount;
-  String createdDate;
-  String dueDate;
+  double amount;
+  DateTime createdDate;
+  DateTime dueDate;
   bool recurring;
   int frequency;
-  String units;
+  String frequencyUnits;
   Color color;
   IconData icon;
   String paymentMethod;
@@ -45,42 +45,42 @@ class Payment {
   bool enabled;
   bool hidden;
 
-  factory Payment.fromMap(Map<String, dynamic> json) => Payment(
+  factory Payment.fromJson(Map<String, dynamic> json) => Payment(
     id: json["id"],
     name: json["name"],
     description: json["description"],
-    amount: json["amount"],
-    createdDate: json["created_date"],
-    dueDate: json["due_date"],
+    amount: json["amount"].toDouble(),
+    createdDate: DateTime.parse(json["createdDate"]),
+    dueDate: DateTime.parse(json["dueDate"]),
     recurring: json["recurring"],
-    frequency: json["frequency"],
-    units: json["units"],
+    frequency: json["frequency"] == null ? null : json["frequency"],
+    frequencyUnits: json["frequencyUnits"] == null ? null : json["frequencyUnits"],
     color: Color(int.parse(json["color"])),
     icon: IconData(int.parse(json["icon"]), fontFamily: 'MaterialIcons'),
     paymentMethod: json["payment_method"],
-    interestPercentage: json["interest_percentage"],
-    compoundedFrequency: json["compounded_frequency"],
-    notes: json["notes"],
+    interestPercentage: json["interestPercentage"] == null ? null : json["interestPercentage"],
+    compoundedFrequency: json["compoundedFrequency"] == null ? null : json["compoundedFrequency"],
+    notes: json["notes"] == null ? null : json["notes"],
     enabled: json["enabled"],
     hidden: json["hidden"],
   );
 
-  Map<String, dynamic> toMap() => {
+  Map<String, dynamic> toJson() => {
     "id": id,
     "name": name,
     "description": description,
     "amount": amount,
-    "created_date": createdDate,
-    "due_date": dueDate,
+    "createdDate": createdDate.toIso8601String(),
+    "dueDate": dueDate.toIso8601String(),
     "recurring": recurring,
-    "frequency": frequency,
-    "units": units,
+    "frequency": frequency == null ? null : frequency,
+    "frequencyUnits": frequencyUnits == null ? null : frequencyUnits,
     "color": color.value,
     "icon": icon.codePoint,
     "payment_method": paymentMethod,
-    "interest_percentage": interestPercentage,
-    "compounded_frequency": compoundedFrequency,
-    "notes": notes,
+    "interestPercentage": interestPercentage == null ? null : interestPercentage,
+    "compoundedFrequency": compoundedFrequency == null ? null : compoundedFrequency,
+    "notes": notes == null ? null : notes,
     "enabled": enabled,
     "hidden": hidden,
   };

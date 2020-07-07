@@ -95,7 +95,7 @@ class _EditScreenState extends State<EditScreen> {
     loadFrequencyUnits();
     loadColorList();
     loadIconList();
-    DateTime selectedDate = DateTime.parse(widget.payment.dueDate);
+    DateTime selectedDate = widget.payment.dueDate;
     TextEditingController dueDateCtl = TextEditingController(text: selectedDate.toIso8601String().split('T')[0]);
 
     Future<Null> _selectDueDate(BuildContext context) async {
@@ -179,7 +179,7 @@ class _EditScreenState extends State<EditScreen> {
                       padding: const EdgeInsets.only(bottom: 15.0),
                       child: TextFormField(
                         keyboardType: TextInputType.number,
-                        initialValue: widget.payment.amount,
+                        initialValue: widget.payment.amount.toString(),
                         decoration: InputDecoration(
                             prefixText: '\$',
                             labelText: 'Amount',
@@ -192,7 +192,7 @@ class _EditScreenState extends State<EditScreen> {
 
                           return null;
                         },
-                        onSaved: (val) => setState(() => widget.payment.amount = val),
+                        onSaved: (val) => setState(() => widget.payment.amount = double.parse(val)),
                       ),
                     ),
                     Padding(
@@ -212,7 +212,7 @@ class _EditScreenState extends State<EditScreen> {
 
                           return null;
                         },
-                        onSaved: (val) => setState(() => widget.payment.dueDate = val),
+                        onSaved: (val) => setState(() => widget.payment.dueDate = DateTime.parse(val)),
                       ),
                     ),
                     Padding(
@@ -259,10 +259,10 @@ class _EditScreenState extends State<EditScreen> {
                             labelText: 'Frequency Units',
                             border: OutlineInputBorder(),
                           ),
-                          value: widget.payment.units,
+                          value: widget.payment.frequencyUnits,
                           onChanged: (value) {
                             setState(() {
-                              widget.payment.units = value;
+                              widget.payment.frequencyUnits = value;
                             });
                           },
                         ),

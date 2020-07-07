@@ -9,13 +9,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final payments = [Payment(id: 1, name: "mobile", description: "mobile bill", amount: "100.00", createdDate: "20200625", dueDate: "20200703", recurring: true, frequency: 1, units: "MONTHS", color: Colors.green, icon: Icons.phone_android, paymentMethod: "visa", interestPercentage: 0, compoundedFrequency: "0", notes: "", enabled: true, hidden: false)];
+  final payments = [Payment(id: 1, name: "mobile", description: "mobile bill", amount: 100.00, createdDate: DateTime.parse("2020/06/25"), dueDate: DateTime.parse("2020/07/03"), recurring: true, frequency: 1, frequencyUnits: "MONTHS", color: Colors.green, icon: Icons.phone_android, paymentMethod: "visa", interestPercentage: 0, compoundedFrequency: "0", notes: "", enabled: true, hidden: false)];
 
   final SlidableController slidableController = SlidableController();
 
   void _doAction() {
     setState(() {
-
+      
     });
   }
 
