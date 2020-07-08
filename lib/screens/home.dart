@@ -1,3 +1,4 @@
+import 'package:duedate/db/Payment_DAO.dart';
 import 'package:duedate/models/PaymentModel.dart';
 import 'package:flutter/material.dart';
 import 'package:duedate/screens/edit.dart';
@@ -9,14 +10,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final payments = [Payment(id: 1, name: "mobile", description: "mobile bill", amount: 100.00, createdDate: DateTime.parse("2020/06/25"), dueDate: DateTime.parse("2020/07/03"), recurring: true, frequency: 1, frequencyUnits: "MONTHS", color: Colors.green, icon: Icons.phone_android, paymentMethod: "visa", interestPercentage: 0, compoundedFrequency: "0", notes: "", enabled: true, hidden: false)];
-
+  final PaymentDAO _paymentDAO = PaymentDAO();
   final SlidableController slidableController = SlidableController();
+  Future<List<Payment>> _paymentsFuture;
 
-  void _doAction() {
-    setState(() {
-      
-    });
+  @override
+  void initState() {
+      super.initState();
+      _paymentsFuture = _paymentDAO.getAllPayments();
   }
 
   void _showSnackBar(BuildContext context, String text) {
@@ -44,7 +45,27 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text('Due Date'),
         //backgroundColor: Colors.deepOrange,
       ),
-      body: mainListView(context),
+      body: FutureBuilder<List<Payment>> (
+        future: _paymentsFuture,
+        builder: (BuildContext context, AsyncSnapshot<List<Payment>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasData) {
+              // data loaded:
+              final _paymentsList = snapshot.data;
+              return mainListView(context, _paymentsList);
+            }
+            else if (snapshot.hasError) {
+              return Center(
+                child: Text("Error: ${snapshot.error.toString()}"),
+              );
+            }
+          }
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+
+      ),
       bottomNavigationBar: BottomAppBar(
         //color: Colors.deepOrange,
         shape: const CircularNotchedRectangle(),
@@ -55,16 +76,27 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         //backgroundColor: Colors.deepPurple,
-        onPressed: _doAction,
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EditScreen(payment: null),
+            ),
+          );
+
+          setState(() {
+            _paymentsFuture = _paymentDAO.getAllPayments();
+          });
+        },
         tooltip: 'Do Action',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
-  Widget mainListView(BuildContext context) {
+  Widget mainListView(BuildContext context, List<Payment> _payments) {
     return ListView.builder(
-      itemCount: payments.length,
+      itemCount: _payments.length,
       itemBuilder: (context, index) {
         return Slidable(
           actionPane: SlidableBehindActionPane(),
@@ -73,26 +105,27 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Container(
             color: Colors.white,
             child: Card( //                           <-- Card widget
-              color: payments[index].color,
+              color: _payments[index].color,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.0),
               ),
               child: ListTile(
-                leading: Icon(payments[index].icon),
-                title: Text(payments[index].name),
-                subtitle: Text("Due: ${payments[index].dueDate}"),
+                leading: Icon(_payments[index].icon),
+                title: Text(_payments[index].name),
+                subtitle: Text("Due: ${_payments[index].formatDueDate()}"),
                 trailing: Icon(Icons.keyboard_arrow_right),
                 onTap: () async {
                   final payment = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => EditScreen(payment: payments[index]),
+                      builder: (context) => EditScreen(payment: _payments[index]),
                     ),
                   );
 
                   setState(() {
                     if (payment != null) {
-                      payments[index] = payment;
+                      _paymentDAO.update(payment);
+                      _paymentsFuture = _paymentDAO.getAllPayments();
                     }
                   });
                 },

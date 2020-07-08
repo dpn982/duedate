@@ -1,9 +1,10 @@
+import 'package:duedate/db/Payment_DAO.dart';
 import 'package:duedate/models/PaymentModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 class EditScreen extends StatefulWidget {
-  final Payment payment;
+  Payment payment;
 
   EditScreen({Key key, @required this.payment}) : super(key: key);
 
@@ -16,6 +17,17 @@ class _EditScreenState extends State<EditScreen> {
   List<DropdownMenuItem<String>> _frequencyList = [];
   List<DropdownMenuItem<Color>> _colorList = [];
   List<DropdownMenuItem<IconData>> _iconList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.payment == null) {
+      widget.payment = Payment(name: "", description: "", amount: 0.00, dueDate: DateTime.now(), recurring: false, frequency: null, frequencyUnits: "SECONDS", color: Colors.blue[500], icon: Icons.payment, paymentMethod: "", interestPercentage: 0, compoundedFrequency: "", notes: "", enabled: true, hidden: false);
+    }
+    loadFrequencyUnits();
+    loadColorList();
+    loadIconList();
+  }
 
   void loadFrequencyUnits() {
     _frequencyList = [];
@@ -30,17 +42,17 @@ class _EditScreenState extends State<EditScreen> {
 
   void loadColorList() {
     _colorList = [];
-    _colorList.add(generateColorMenuItem("Red", Colors.red));
-    _colorList.add(generateColorMenuItem("Blue", Colors.blue));
-    _colorList.add(generateColorMenuItem("Green", Colors.green));
-    _colorList.add(generateColorMenuItem("Purple", Colors.purple));
-    _colorList.add(generateColorMenuItem("Orange", Colors.orange));
-    _colorList.add(generateColorMenuItem("Yellow", Colors.yellow));
-    _colorList.add(generateColorMenuItem("Pink", Colors.pink));
-    _colorList.add(generateColorMenuItem("Brown", Colors.brown));
-    _colorList.add(generateColorMenuItem("Teal", Colors.teal));
-    _colorList.add(generateColorMenuItem("Indigo", Colors.indigo));
-    _colorList.add(generateColorMenuItem("Amber", Colors.amber));
+    _colorList.add(generateColorMenuItem("Red", Colors.red[500]));
+    _colorList.add(generateColorMenuItem("Blue", Colors.blue[500]));
+    _colorList.add(generateColorMenuItem("Green", Colors.green[500]));
+    _colorList.add(generateColorMenuItem("Purple", Colors.purple[500]));
+    _colorList.add(generateColorMenuItem("Orange", Colors.orange[500]));
+    _colorList.add(generateColorMenuItem("Yellow", Colors.yellow[500]));
+    _colorList.add(generateColorMenuItem("Pink", Colors.pink[500]));
+    _colorList.add(generateColorMenuItem("Brown", Colors.brown[500]));
+    _colorList.add(generateColorMenuItem("Teal", Colors.teal[500]));
+    _colorList.add(generateColorMenuItem("Indigo", Colors.indigo[500]));
+    _colorList.add(generateColorMenuItem("Amber", Colors.amber[500]));
   }
 
   void loadIconList() {
@@ -92,9 +104,6 @@ class _EditScreenState extends State<EditScreen> {
 
   @override
   Widget build(BuildContext context) {
-    loadFrequencyUnits();
-    loadColorList();
-    loadIconList();
     DateTime selectedDate = widget.payment.dueDate;
     TextEditingController dueDateCtl = TextEditingController(text: selectedDate.toIso8601String().split('T')[0]);
 
@@ -121,7 +130,9 @@ class _EditScreenState extends State<EditScreen> {
                     final form = _formKey.currentState;
                     if (form.validate()) {
                       form.save();
-                      Navigator.pop(context, widget.payment);
+                      PaymentDAO _paymentDAO = new PaymentDAO();
+                      _paymentDAO.insert(widget.payment);
+                      Navigator.pop(context);
                     }
                   },
                   child: Icon(

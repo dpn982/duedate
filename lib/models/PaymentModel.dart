@@ -1,18 +1,19 @@
 import 'dart:convert';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 
 Payment paymentFromJson(String str) => Payment.fromJson(json.decode(str));
 
 String paymentToJson(Payment data) => json.encode(data.toJson());
 
 class Payment {
+  DateFormat dateFormat = DateFormat('yyyy-MM-dd');
+
   Payment({
-    this.id,
     this.name,
     this.description,
     this.amount,
-    this.createdDate,
     this.dueDate,
     this.recurring,
     this.frequency,
@@ -31,7 +32,7 @@ class Payment {
   String name;
   String description;
   double amount;
-  DateTime createdDate;
+  DateTime createdDate = DateTime.now();
   DateTime dueDate;
   bool recurring;
   int frequency;
@@ -39,26 +40,24 @@ class Payment {
   Color color;
   IconData icon;
   String paymentMethod;
-  int interestPercentage;
+  double interestPercentage;
   String compoundedFrequency;
   String notes;
   bool enabled;
   bool hidden;
 
   factory Payment.fromJson(Map<String, dynamic> json) => Payment(
-    id: json["id"],
     name: json["name"],
     description: json["description"],
     amount: json["amount"].toDouble(),
-    createdDate: DateTime.parse(json["createdDate"]),
     dueDate: DateTime.parse(json["dueDate"]),
     recurring: json["recurring"],
     frequency: json["frequency"] == null ? null : json["frequency"],
     frequencyUnits: json["frequencyUnits"] == null ? null : json["frequencyUnits"],
-    color: Color(int.parse(json["color"])),
-    icon: IconData(int.parse(json["icon"]), fontFamily: 'MaterialIcons'),
+    color: Color(json["color"]),
+    icon: IconData(json["icon"], fontFamily: 'MaterialIcons'),
     paymentMethod: json["payment_method"],
-    interestPercentage: json["interestPercentage"] == null ? null : json["interestPercentage"],
+    interestPercentage: json["interestPercentage"] == null ? null : json["interestPercentage"].toDouble(),
     compoundedFrequency: json["compoundedFrequency"] == null ? null : json["compoundedFrequency"],
     notes: json["notes"] == null ? null : json["notes"],
     enabled: json["enabled"],
@@ -84,4 +83,8 @@ class Payment {
     "enabled": enabled,
     "hidden": hidden,
   };
+
+  String formatDueDate() {
+    return dateFormat.format(dueDate);
+  }
 }

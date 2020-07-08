@@ -26,6 +26,7 @@ class PaymentDAO{
     final recordSnapshot = await _paymentFolder.find(await _db);
     return recordSnapshot.map((snapshot) {
       final payment = Payment.fromJson(snapshot.value);
+      payment.id = snapshot.key;
       return payment;
     }).toList();
   }
