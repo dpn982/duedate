@@ -1,4 +1,4 @@
-import 'package:duedate/db/Payment_DAO.dart';
+
 import 'package:duedate/models/PaymentModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -130,9 +130,7 @@ class _EditScreenState extends State<EditScreen> {
                     final form = _formKey.currentState;
                     if (form.validate()) {
                       form.save();
-                      PaymentDAO _paymentDAO = new PaymentDAO();
-                      _paymentDAO.insert(widget.payment);
-                      Navigator.pop(context);
+                      Navigator.pop(context, widget.payment);
                     }
                   },
                   child: Icon(

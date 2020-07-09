@@ -76,17 +76,25 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         //backgroundColor: Colors.deepPurple,
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          final payment = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => EditScreen(payment: null),
             ),
           );
 
-          setState(() {
-            _paymentsFuture = _paymentDAO.getAllPayments();
-          });
+          if (payment != null) {
+            print("inserting payment");
+            _paymentDAO.insert(payment);
+            await new Future.delayed(const Duration(seconds : 20));
+            final result = _paymentDAO.getAllPayments();
+
+            setState(() {
+              _paymentsFuture = result;
+            });
+          }
+
         },
         tooltip: 'Do Action',
         child: Icon(Icons.add),
@@ -122,11 +130,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   );
 
+                  if (payment != null) {
+                    _paymentDAO.update(payment);
+                  }
+                  await new Future.delayed(const Duration(seconds : 20));
+                  final result = _paymentDAO.getAllPayments();
+
                   setState(() {
-                    if (payment != null) {
-                      _paymentDAO.update(payment);
-                      _paymentsFuture = _paymentDAO.getAllPayments();
-                    }
+                    _paymentsFuture = result;
                   });
                 },
               ),
