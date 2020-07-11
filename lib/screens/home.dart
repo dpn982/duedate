@@ -1,5 +1,6 @@
 import 'package:duedate/db/Payment_DAO.dart';
 import 'package:duedate/models/PaymentModel.dart';
+import 'package:duedate/screens/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:duedate/screens/edit.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -36,6 +37,36 @@ class _HomeScreenState extends State<HomeScreen> {
     Scaffold.of(context).showSnackBar(snackBar);
   }
 
+  _showDeleteConfirmation(BuildContext context, {Function cancelPressed, Function continuePressed}) {
+    // set up the buttons
+    Widget cancelButton = FlatButton(
+      child: Text("Cancel"),
+      onPressed:  () => cancelPressed(),
+    );
+    Widget continueButton = FlatButton(
+      child: Text("Continue"),
+      onPressed:  () => continuePressed(),
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Delete Confirmation"),
+      content: Text("Are you sure you want to delete this item?"),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,6 +75,25 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: Icon(Icons.calendar_today),
         title: Text('Due Date'),
         //backgroundColor: Colors.deepOrange,
+        actions: <Widget>[
+          Padding(
+              padding: EdgeInsets.only(right: 20.0),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SettingsScreen(),
+                    ),
+                  );
+                },
+                child: Icon(
+                  Icons.settings,
+                  size: 26.0,
+                ),
+              )
+          ),
+        ],
       ),
       body: FutureBuilder<List<Payment>> (
         future: _paymentsFuture,
@@ -69,8 +119,23 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomAppBar(
         //color: Colors.deepOrange,
         shape: const CircularNotchedRectangle(),
-        child: Container(
-          height: 50.0,
+        child: new Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            IconButton(
+              icon: Icon(Icons.filter_list),
+              onPressed: () {
+
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () {
+
+              },
+            ),
+          ],
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -87,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
           if (payment != null) {
             print("inserting payment");
             _paymentDAO.insert(payment);
-            await new Future.delayed(const Duration(seconds : 20));
+            await new Future.delayed(const Duration(seconds : 5));
             final result = _paymentDAO.getAllPayments();
 
             setState(() {
@@ -103,76 +168,89 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget mainListView(BuildContext context, List<Payment> _payments) {
-    return ListView.builder(
-      itemCount: _payments.length,
-      itemBuilder: (context, index) {
-        return Slidable(
-          actionPane: SlidableBehindActionPane(),
-          actionExtentRatio: 0.25,
-          controller: slidableController,
-          child: Container(
-            color: Colors.white,
-            child: Card( //                           <-- Card widget
+    return RefreshIndicator(
+      onRefresh: () async {
+        final result = _paymentDAO.getAllPayments();
+
+        setState(() {
+          _paymentsFuture = result;
+        });
+      },
+      child: ListView.builder(
+        itemCount: _payments.length,
+        itemBuilder: (context, index) {
+          return Slidable(
+            actionPane: SlidableBehindActionPane(),
+            actionExtentRatio: 0.25,
+            controller: slidableController,
+            child: Container(
               color: _payments[index].color,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
+              child: Card( //                           <-- Card widget
+                color: _payments[index].color,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                child: ListTile(
+                  leading: Icon(_payments[index].icon),
+                  title: Text(_payments[index].name),
+                  subtitle: Text("Due: ${_payments[index].formatDueDate()}"),
+                  trailing: Icon(Icons.keyboard_arrow_right),
+                  onTap: () async {
+                    final payment = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditScreen(payment: _payments[index]),
+                      ),
+                    );
+
+                    if (payment != null) {
+                      _paymentDAO.update(payment);
+                    }
+                    await new Future.delayed(const Duration(seconds : 20));
+                    final result = _paymentDAO.getAllPayments();
+
+                    setState(() {
+                      _paymentsFuture = result;
+                    });
+                  },
+                ),
               ),
-              child: ListTile(
-                leading: Icon(_payments[index].icon),
-                title: Text(_payments[index].name),
-                subtitle: Text("Due: ${_payments[index].formatDueDate()}"),
-                trailing: Icon(Icons.keyboard_arrow_right),
-                onTap: () async {
-                  final payment = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditScreen(payment: _payments[index]),
-                    ),
-                  );
+            ),
+            actions: <Widget>[
+              IconSlideAction(
+                caption: 'Delete',
+                color: Colors.red,
+                icon: Icons.delete,
+                onTap: () {
+                  _showDeleteConfirmation(context,
+                      cancelPressed: () {
+                        Navigator.pop(context);
+                      },
+                      continuePressed: () {
+                        _paymentDAO.delete(_payments[index]);
 
-                  if (payment != null) {
-                    _paymentDAO.update(payment);
-                  }
-                  await new Future.delayed(const Duration(seconds : 20));
-                  final result = _paymentDAO.getAllPayments();
+                        _showSnackBar(context, "Delete ${_payments[index].name}");
+                        final result = _paymentDAO.getAllPayments();
 
-                  setState(() {
-                    _paymentsFuture = result;
-                  });
+                        setState(() {
+                          _paymentsFuture = result;
+                        });
+                        Navigator.pop(context);
+                      });
                 },
               ),
-            ),
-          ),
-          actions: <Widget>[
-            IconSlideAction(
-              caption: 'Archive',
-              color: Colors.blue,
-              icon: Icons.archive,
-              onTap: () => _showSnackBar(context, 'Archive'),
-            ),
-            IconSlideAction(
-              caption: 'Share',
-              color: Colors.indigo,
-              icon: Icons.share,
-              onTap: () => _showSnackBar(context, 'Share'),
-            ),
-          ],
-          secondaryActions: <Widget>[
-            IconSlideAction(
-              caption: 'More',
-              color: Colors.black45,
-              icon: Icons.more_horiz,
-              onTap: () => _showSnackBar(context, 'More'),
-            ),
-            IconSlideAction(
-              caption: 'Delete',
-              color: Colors.red,
-              icon: Icons.delete,
-              onTap: () => _showSnackBar(context, 'Delete'),
-            ),
-          ],
-        );
-      },
+            ],
+            secondaryActions: <Widget>[
+              IconSlideAction(
+                caption: 'Archive',
+                color: Colors.blue,
+                icon: Icons.archive,
+                onTap: () => _showSnackBar(context, 'Archive'),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
