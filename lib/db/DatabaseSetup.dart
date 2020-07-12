@@ -5,10 +5,8 @@ import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:path/path.dart';
 
-class AppDatabase{
-
+class AppDatabase {
   static final AppDatabase _singleton = AppDatabase._();
-
 
   static AppDatabase get instance => _singleton;
 
@@ -23,9 +21,9 @@ class AppDatabase{
   Future<Database> get database async {
     // If completer is null, AppDatabaseClass is newly instantiated, so database is not yet opened
     if (_dbOpenCompleter == null) {
-    _dbOpenCompleter = Completer();
-    // Calling _openDatabase will also complete the completer with database instance
-    _openDatabase();
+      _dbOpenCompleter = Completer();
+      // Calling _openDatabase will also complete the completer with database instance
+      _openDatabase();
     }
     // If the database is already opened, awaiting the future will happen instantly.
     // Otherwise, awaiting the returned future will take some time - until complete() is called
@@ -40,7 +38,6 @@ class AppDatabase{
     final dbPath = join(appDocumentDir.path, 'PaymentsDB.db');
 
     final database = await databaseFactoryIo.openDatabase(dbPath);
-
 
     // Any code awaiting the Completer's future will now start executing
     _dbOpenCompleter.complete(database);

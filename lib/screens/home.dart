@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:duedate/screens/edit.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
+enum FilterType {All, Completed, UnCompleted, Hidden, Recurring}
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -14,21 +16,51 @@ class _HomeScreenState extends State<HomeScreen> {
   final PaymentDAO _paymentDAO = PaymentDAO();
   final SlidableController slidableController = SlidableController();
   Future<List<Payment>> _paymentsFuture;
+  FilterType _selectedView;
 
   @override
   void initState() {
-      super.initState();
-      _paymentsFuture = _paymentDAO.getAllPayments();
+    super.initState();
+    _selectedView = FilterType.UnCompleted;
+    _paymentsFuture = _getPayments();
   }
 
-  void _showSnackBar(BuildContext context, String text) {
+  Future<List<Payment>> _getPayments() async {
+    Future<List<Payment>> result;
+
+    switch (_selectedView) {
+      case FilterType.All: {
+        result = _paymentDAO.getAllPayments();
+      }
+      break;
+      case FilterType.UnCompleted: {
+        result = _paymentDAO.getUnCompletedPayments();
+      }
+      break;
+      case FilterType.Completed: {
+        result = _paymentDAO.getCompletedPayments();
+      }
+      break;
+      case FilterType.Hidden: {
+        result = _paymentDAO.getHiddenPayments();
+      }
+      break;
+      case FilterType.Recurring: {
+        result = _paymentDAO.getRecurringPayments();
+      }
+      break;
+    }
+
+    return result;
+  }
+
+  void _showSnackBar(BuildContext context,
+      {String text, String actionText, Function actionOnPressed}) {
     final snackBar = SnackBar(
       content: Text(text),
       action: SnackBarAction(
-        label: 'Undo',
-        onPressed: () {
-          // Some code to undo the change.
-        },
+        label: actionText,
+        onPressed: () => actionOnPressed(),
       ),
     );
 
@@ -37,15 +69,16 @@ class _HomeScreenState extends State<HomeScreen> {
     Scaffold.of(context).showSnackBar(snackBar);
   }
 
-  _showDeleteConfirmation(BuildContext context, {Function cancelPressed, Function continuePressed}) {
+  _showDeleteConfirmation(BuildContext context,
+      {Function cancelPressed, Function continuePressed}) {
     // set up the buttons
     Widget cancelButton = FlatButton(
       child: Text("Cancel"),
-      onPressed:  () => cancelPressed(),
+      onPressed: () => cancelPressed(),
     );
     Widget continueButton = FlatButton(
       child: Text("Continue"),
-      onPressed:  () => continuePressed(),
+      onPressed: () => continuePressed(),
     );
 
     // set up the AlertDialog
@@ -91,11 +124,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   Icons.settings,
                   size: 26.0,
                 ),
-              )
-          ),
+              )),
         ],
       ),
-      body: FutureBuilder<List<Payment>> (
+      body: FutureBuilder<List<Payment>>(
         future: _paymentsFuture,
         builder: (BuildContext context, AsyncSnapshot<List<Payment>> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
@@ -103,8 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
               // data loaded:
               final _paymentsList = snapshot.data;
               return mainListView(context, _paymentsList);
-            }
-            else if (snapshot.hasError) {
+            } else if (snapshot.hasError) {
               return Center(
                 child: Text("Error: ${snapshot.error.toString()}"),
               );
@@ -114,7 +145,6 @@ class _HomeScreenState extends State<HomeScreen> {
             child: CircularProgressIndicator(),
           );
         },
-
       ),
       bottomNavigationBar: BottomAppBar(
         //color: Colors.deepOrange,
@@ -123,17 +153,43 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            IconButton(
+            new PopupMenuButton<FilterType>(
+              onSelected: (value){
+                setState(() => _selectedView = value);
+                _paymentsFuture = _getPayments();
+                },
               icon: Icon(Icons.filter_list),
-              onPressed: () {
-
-              },
+              itemBuilder: (_) => [
+                new CheckedPopupMenuItem<FilterType>(
+                  checked: _selectedView == FilterType.Completed,
+                  value: FilterType.Completed,
+                  child: new Text('Completed', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+                new CheckedPopupMenuItem<FilterType>(
+                  checked: _selectedView == FilterType.UnCompleted,
+                  value: FilterType.UnCompleted,
+                  child: new Text('Uncompleted', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+                new CheckedPopupMenuItem<FilterType>(
+                  checked: _selectedView == FilterType.All,
+                  value: FilterType.All,
+                  child: new Text('All', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+                new CheckedPopupMenuItem<FilterType>(
+                  checked: _selectedView == FilterType.Hidden,
+                  value: FilterType.Hidden,
+                  child: new Text('Hidden', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+                new CheckedPopupMenuItem<FilterType>(
+                  checked: _selectedView == FilterType.Recurring,
+                  value: FilterType.Recurring,
+                  child: new Text('Recurring', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ],
             ),
             IconButton(
               icon: Icon(Icons.search),
-              onPressed: () {
-
-              },
+              onPressed: () {},
             ),
           ],
         ),
@@ -150,16 +206,8 @@ class _HomeScreenState extends State<HomeScreen> {
           );
 
           if (payment != null) {
-            print("inserting payment");
-            _paymentDAO.insert(payment);
-            await new Future.delayed(const Duration(seconds : 5));
-            final result = _paymentDAO.getAllPayments();
-
-            setState(() {
-              _paymentsFuture = result;
-            });
+            _insertPayment(payment);
           }
-
         },
         tooltip: 'Do Action',
         child: Icon(Icons.add),
@@ -167,14 +215,18 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _insertPayment(Payment payment) {
+    _paymentDAO.insert(payment).then((result) {
+      setState(() {
+        _paymentsFuture = _getPayments();
+      });
+    });
+  }
+
   Widget mainListView(BuildContext context, List<Payment> _payments) {
     return RefreshIndicator(
       onRefresh: () async {
-        final result = _paymentDAO.getAllPayments();
-
-        setState(() {
-          _paymentsFuture = result;
-        });
+        _paymentsFuture = _getPayments();
       },
       child: ListView.builder(
         itemCount: _payments.length,
@@ -185,10 +237,11 @@ class _HomeScreenState extends State<HomeScreen> {
             controller: slidableController,
             child: Container(
               color: _payments[index].color,
-              child: Card( //                           <-- Card widget
+              child: Card(
+                //                           <-- Card widget
                 color: _payments[index].color,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(0.0),
                 ),
                 child: ListTile(
                   leading: Icon(_payments[index].icon),
@@ -199,19 +252,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     final payment = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => EditScreen(payment: _payments[index]),
+                        builder: (context) =>
+                            EditScreen(payment: _payments[index]),
                       ),
                     );
 
                     if (payment != null) {
-                      _paymentDAO.update(payment);
+                      _paymentDAO.update(payment).then((result) {
+                        setState(() {
+                          _paymentsFuture = _getPayments();
+                        });
+                      });
                     }
-                    await new Future.delayed(const Duration(seconds : 20));
-                    final result = _paymentDAO.getAllPayments();
-
-                    setState(() {
-                      _paymentsFuture = result;
-                    });
                   },
                 ),
               ),
@@ -222,21 +274,25 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Colors.red,
                 icon: Icons.delete,
                 onTap: () {
-                  _showDeleteConfirmation(context,
-                      cancelPressed: () {
-                        Navigator.pop(context);
-                      },
-                      continuePressed: () {
-                        _paymentDAO.delete(_payments[index]);
-
-                        _showSnackBar(context, "Delete ${_payments[index].name}");
-                        final result = _paymentDAO.getAllPayments();
-
-                        setState(() {
-                          _paymentsFuture = result;
-                        });
-                        Navigator.pop(context);
+                  Payment currentPayment = _payments[index];
+                  _showDeleteConfirmation(context, cancelPressed: () {
+                    Navigator.pop(context);
+                  }, continuePressed: () {
+                    _paymentDAO.delete(_payments[index]).then((result) {
+                      Navigator.pop(context);
+                      setState(() {
+                        _paymentsFuture = _getPayments();
                       });
+                    });
+                    _showSnackBar(
+                      context,
+                      text: "Delete ${currentPayment.name}",
+                      actionText: "Undo",
+                      actionOnPressed: () {
+                        _insertPayment(currentPayment);
+                      },
+                    );
+                  });
                 },
               ),
             ],
@@ -245,7 +301,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 caption: 'Archive',
                 color: Colors.blue,
                 icon: Icons.archive,
-                onTap: () => _showSnackBar(context, 'Archive'),
+                onTap: () => _showSnackBar(
+                  context,
+                  text: 'Archive',
+                  actionText: "Undo",
+                  actionOnPressed: () {
+
+                  },
+                ),
               ),
             ],
           );

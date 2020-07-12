@@ -24,8 +24,8 @@ class Payment {
     this.interestPercentage,
     this.compoundedFrequency,
     this.notes,
-    this.enabled,
     this.hidden,
+    this.completed
   });
 
   int id;
@@ -43,8 +43,8 @@ class Payment {
   double interestPercentage;
   String compoundedFrequency;
   String notes;
-  bool enabled;
   bool hidden;
+  bool completed;
 
   factory Payment.fromJson(Map<String, dynamic> json) => Payment(
     name: json["name"],
@@ -60,8 +60,8 @@ class Payment {
     interestPercentage: json["interestPercentage"] == null ? null : json["interestPercentage"].toDouble(),
     compoundedFrequency: json["compoundedFrequency"] == null ? null : json["compoundedFrequency"],
     notes: json["notes"] == null ? null : json["notes"],
-    enabled: json["enabled"],
     hidden: json["hidden"],
+    completed: json["completed"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -80,8 +80,8 @@ class Payment {
     "interestPercentage": interestPercentage == null ? null : interestPercentage,
     "compoundedFrequency": compoundedFrequency == null ? null : compoundedFrequency,
     "notes": notes == null ? null : notes,
-    "enabled": enabled,
     "hidden": hidden,
+    "completed": completed,
   };
 
   String formatDueDate() {
