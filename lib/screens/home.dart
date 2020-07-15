@@ -54,6 +54,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return result;
   }
 
+  CheckedPopupMenuItem<FilterType> _getPopupMenuItem(String text, FilterType type) {
+    return CheckedPopupMenuItem<FilterType>(
+      checked: _selectedView == type,
+      value: type,
+      child: Text(text, style: TextStyle(fontWeight: FontWeight.bold)),
+    );
+  }
+
   void _showSnackBar(BuildContext context,
       {String text, String actionText, Function actionOnPressed}) {
     final snackBar = SnackBar(
@@ -67,6 +75,14 @@ class _HomeScreenState extends State<HomeScreen> {
     // Find the Scaffold in the widget tree and use
     // it to show a SnackBar.
     Scaffold.of(context).showSnackBar(snackBar);
+  }
+
+  void _insertPayment(Payment payment) {
+    _paymentDAO.insert(payment).then((result) {
+      setState(() {
+        _paymentsFuture = _getPayments();
+      });
+    });
   }
 
   _showDeleteConfirmation(BuildContext context,
@@ -103,11 +119,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: Icon(Icons.calendar_today),
         title: Text('Due Date'),
-        //backgroundColor: Colors.deepOrange,
         actions: <Widget>[
           Padding(
               padding: EdgeInsets.only(right: 20.0),
@@ -149,42 +163,22 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomAppBar(
         //color: Colors.deepOrange,
         shape: const CircularNotchedRectangle(),
-        child: new Row(
+        child: Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            new PopupMenuButton<FilterType>(
+            PopupMenuButton<FilterType>(
               onSelected: (value){
                 setState(() => _selectedView = value);
                 _paymentsFuture = _getPayments();
                 },
               icon: Icon(Icons.filter_list),
               itemBuilder: (_) => [
-                new CheckedPopupMenuItem<FilterType>(
-                  checked: _selectedView == FilterType.Completed,
-                  value: FilterType.Completed,
-                  child: new Text('Completed', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-                new CheckedPopupMenuItem<FilterType>(
-                  checked: _selectedView == FilterType.UnCompleted,
-                  value: FilterType.UnCompleted,
-                  child: new Text('Uncompleted', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-                new CheckedPopupMenuItem<FilterType>(
-                  checked: _selectedView == FilterType.All,
-                  value: FilterType.All,
-                  child: new Text('All', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-                new CheckedPopupMenuItem<FilterType>(
-                  checked: _selectedView == FilterType.Hidden,
-                  value: FilterType.Hidden,
-                  child: new Text('Hidden', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-                new CheckedPopupMenuItem<FilterType>(
-                  checked: _selectedView == FilterType.Recurring,
-                  value: FilterType.Recurring,
-                  child: new Text('Recurring', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
+                _getPopupMenuItem("Completed", FilterType.Completed),
+                _getPopupMenuItem("Uncompleted", FilterType.UnCompleted),
+                _getPopupMenuItem("All", FilterType.All),
+                _getPopupMenuItem("Hidden", FilterType.Hidden),
+                _getPopupMenuItem("Recurring", FilterType.Recurring),
               ],
             ),
             IconButton(
@@ -196,7 +190,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-        //backgroundColor: Colors.deepPurple,
         onPressed: () async {
           final payment = await Navigator.push(
             context,
@@ -213,14 +206,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
-  }
-
-  void _insertPayment(Payment payment) {
-    _paymentDAO.insert(payment).then((result) {
-      setState(() {
-        _paymentsFuture = _getPayments();
-      });
-    });
   }
 
   Widget mainListView(BuildContext context, List<Payment> _payments) {

@@ -45,31 +45,31 @@ class _EditScreenState extends State<EditScreen> {
 
   void loadFrequencyUnits() {
     _frequencyList = [];
-    _frequencyList.add(new DropdownMenuItem(
+    _frequencyList.add(DropdownMenuItem(
       child: Text("Seconds"),
       value: "SECONDS",
     ));
-    _frequencyList.add(new DropdownMenuItem(
+    _frequencyList.add(DropdownMenuItem(
       child: Text("Minutes"),
       value: "MINUTES",
     ));
-    _frequencyList.add(new DropdownMenuItem(
+    _frequencyList.add(DropdownMenuItem(
       child: Text("Hours"),
       value: "HOURS",
     ));
-    _frequencyList.add(new DropdownMenuItem(
+    _frequencyList.add(DropdownMenuItem(
       child: Text("Days"),
       value: "DAYS",
     ));
-    _frequencyList.add(new DropdownMenuItem(
+    _frequencyList.add(DropdownMenuItem(
       child: Text("Weeks"),
       value: "WEEKS",
     ));
-    _frequencyList.add(new DropdownMenuItem(
+    _frequencyList.add(DropdownMenuItem(
       child: Text("Months"),
       value: "MONTHS",
     ));
-    _frequencyList.add(new DropdownMenuItem(
+    _frequencyList.add(DropdownMenuItem(
       child: Text("Years"),
       value: "YEARS",
     ));
@@ -108,7 +108,7 @@ class _EditScreenState extends State<EditScreen> {
   }
 
   DropdownMenuItem<Color> generateColorMenuItem(String text, Color value) {
-    return new DropdownMenuItem(
+    return DropdownMenuItem(
       child: Row(
         children: <Widget>[
           Container(
@@ -127,7 +127,7 @@ class _EditScreenState extends State<EditScreen> {
   }
 
   DropdownMenuItem<IconData> generateIconMenuItem(String text, IconData value) {
-    return new DropdownMenuItem(
+    return DropdownMenuItem(
       child: Row(
         children: <Widget>[
           Icon(value),
@@ -305,7 +305,7 @@ class _EditScreenState extends State<EditScreen> {
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 15.0),
                       child: DropdownButtonFormField(
-                        hint: new Text('Select Frequency Units'),
+                        hint: Text('Select Frequency Units'),
                         items: _frequencyList,
                         decoration: InputDecoration(
                           labelText: 'Frequency Units',
@@ -323,7 +323,7 @@ class _EditScreenState extends State<EditScreen> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 15.0),
                     child: DropdownButtonFormField(
-                      hint: new Text('Select Color'),
+                      hint: Text('Select Color'),
                       items: _colorList,
                       decoration: InputDecoration(
                         labelText: 'Color',
@@ -340,7 +340,7 @@ class _EditScreenState extends State<EditScreen> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 15.0),
                     child: DropdownButtonFormField(
-                      hint: new Text('Select Icon'),
+                      hint: Text('Select Icon'),
                       items: _iconList,
                       decoration: InputDecoration(
                         labelText: 'Icon',
