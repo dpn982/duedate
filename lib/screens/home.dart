@@ -1,6 +1,7 @@
-import 'package:duedate/db/Payment_DAO.dart';
-import 'package:duedate/models/PaymentModel.dart';
+import 'package:duedate/db/payment_dao.dart';
+import 'package:duedate/models/payment.dart';
 import 'package:duedate/screens/settings.dart';
+import 'package:duedate/widgets/fancy_button.dart';
 import 'package:flutter/material.dart';
 import 'package:duedate/screens/edit.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -162,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: BottomAppBar(
         //color: Colors.deepOrange,
-        shape: const CircularNotchedRectangle(),
+        //shape: const CircularNotchedRectangle(),
         child: Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -188,8 +189,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FancyButton(
         onPressed: () async {
           final payment = await Navigator.push(
             context,
@@ -202,8 +203,6 @@ class _HomeScreenState extends State<HomeScreen> {
             _insertPayment(payment);
           }
         },
-        tooltip: 'Do Action',
-        child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }

@@ -1,4 +1,4 @@
-import 'package:duedate/models/PaymentModel.dart';
+import 'package:duedate/models/payment.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 

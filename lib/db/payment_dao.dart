@@ -1,6 +1,6 @@
 import 'package:sembast/sembast.dart';
-import '../models/PaymentModel.dart';
-import 'DatabaseSetup.dart';
+import '../models/payment.dart';
+import 'database_setup.dart';
 
 class PaymentDAO {
   static const String folderName = "Payments";
