@@ -1,0 +1,1 @@
+enum FilterType { All, Completed, UnCompleted, Hidden, Recurring }

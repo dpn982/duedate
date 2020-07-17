@@ -13,8 +13,8 @@ class FancyButton extends StatelessWidget {
       splashColor: Colors.orange,
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          vertical: 8.0,
-          horizontal: 20.0,
+          vertical: 15.0,
+          horizontal: 30.0,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

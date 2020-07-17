@@ -1,12 +1,10 @@
 import 'package:duedate/db/payment_dao.dart';
+import 'package:duedate/models/filter_type.dart';
 import 'package:duedate/models/payment.dart';
 import 'package:duedate/screens/settings.dart';
-import 'package:duedate/widgets/fancy_button.dart';
 import 'package:flutter/material.dart';
 import 'package:duedate/screens/edit.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-
-enum FilterType {All, Completed, UnCompleted, Hidden, Recurring}
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -27,35 +25,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<List<Payment>> _getPayments() async {
-    Future<List<Payment>> result;
-
-    switch (_selectedView) {
-      case FilterType.All: {
-        result = _paymentDAO.getAllPayments();
-      }
-      break;
-      case FilterType.UnCompleted: {
-        result = _paymentDAO.getUnCompletedPayments();
-      }
-      break;
-      case FilterType.Completed: {
-        result = _paymentDAO.getCompletedPayments();
-      }
-      break;
-      case FilterType.Hidden: {
-        result = _paymentDAO.getHiddenPayments();
-      }
-      break;
-      case FilterType.Recurring: {
-        result = _paymentDAO.getRecurringPayments();
-      }
-      break;
-    }
-
-    return result;
+    return _paymentDAO.getPayments(filterType: _selectedView);
   }
 
-  CheckedPopupMenuItem<FilterType> _getPopupMenuItem(String text, FilterType type) {
+  CheckedPopupMenuItem<FilterType> _getPopupMenuItem(
+      String text, FilterType type) {
     return CheckedPopupMenuItem<FilterType>(
       checked: _selectedView == type,
       value: type,
@@ -73,8 +47,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    // Find the Scaffold in the widget tree and use
-    // it to show a SnackBar.
     Scaffold.of(context).showSnackBar(snackBar);
   }
 
@@ -124,22 +96,17 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: Icon(Icons.calendar_today),
         title: Text('Due Date'),
         actions: <Widget>[
-          Padding(
-              padding: EdgeInsets.only(right: 20.0),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SettingsScreen(),
-                    ),
-                  );
-                },
-                child: Icon(
-                  Icons.settings,
-                  size: 26.0,
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SettingsScreen(),
                 ),
-              )),
+              );
+            },
+          ),
         ],
       ),
       body: FutureBuilder<List<Payment>>(
@@ -147,7 +114,6 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (BuildContext context, AsyncSnapshot<List<Payment>> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.hasData) {
-              // data loaded:
               final _paymentsList = snapshot.data;
               return mainListView(context, _paymentsList);
             } else if (snapshot.hasError) {
@@ -162,17 +128,16 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
       bottomNavigationBar: BottomAppBar(
-        //color: Colors.deepOrange,
-        //shape: const CircularNotchedRectangle(),
+        shape: const CircularNotchedRectangle(),
         child: Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             PopupMenuButton<FilterType>(
-              onSelected: (value){
+              onSelected: (value) {
                 setState(() => _selectedView = value);
                 _paymentsFuture = _getPayments();
-                },
+              },
               icon: Icon(Icons.filter_list),
               itemBuilder: (_) => [
                 _getPopupMenuItem("Completed", FilterType.Completed),
@@ -189,8 +154,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FancyButton(
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final payment = await Navigator.push(
             context,
@@ -203,6 +168,8 @@ class _HomeScreenState extends State<HomeScreen> {
             _insertPayment(payment);
           }
         },
+        tooltip: 'Do Action',
+        child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
@@ -289,9 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   context,
                   text: 'Archive',
                   actionText: "Undo",
-                  actionOnPressed: () {
-
-                  },
+                  actionOnPressed: () {},
                 ),
               ),
             ],

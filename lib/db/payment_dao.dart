@@ -1,3 +1,4 @@
+import 'package:duedate/models/filter_type.dart';
 import 'package:sembast/sembast.dart';
 import '../models/payment.dart';
 import 'database_setup.dart';
@@ -23,29 +24,51 @@ class PaymentDAO {
     return await _paymentFolder.delete(await _db, finder: finder);
   }
 
-  Future<List<Payment>> getAllPayments({sortby: 'name', ascending: true}) async {
-    return _getPayments(sortby, ascending, Filter.equals("hidden", false));
+  Future<List<Payment>> getPayments(
+      {sortby: 'name', ascending: true, filterType: FilterType.All}) async {
+    Filter filter;
+
+    switch (filterType) {
+      case FilterType.All:
+        {
+          filter = Filter.equals("hidden", false);
+        }
+        break;
+      case FilterType.UnCompleted:
+        {
+          filter = Filter.and([
+            Filter.equals("completed", false),
+            Filter.equals("hidden", false)
+          ]);
+        }
+        break;
+      case FilterType.Completed:
+        {
+          filter = Filter.and([
+            Filter.equals("completed", true),
+            Filter.equals("hidden", false)
+          ]);
+        }
+        break;
+      case FilterType.Hidden:
+        {
+          filter = Filter.equals("hidden", true);
+        }
+        break;
+      case FilterType.Recurring:
+        {
+          filter = Filter.equals("recurring", true);
+        }
+        break;
+    }
+
+    return _getPayments(sortby, ascending, filter);
   }
 
-  Future<List<Payment>> getCompletedPayments({sortby: 'name', ascending: true}) async {
-    return _getPayments(sortby, ascending, Filter.and([Filter.equals("completed", true), Filter.equals("hidden", false)]));
-  }
-
-  Future<List<Payment>> getUnCompletedPayments({sortby: 'name', ascending: true}) async {
-    return _getPayments(sortby, ascending, Filter.and([Filter.equals("completed", false), Filter.equals("hidden", false)]));
-  }
-
-  Future<List<Payment>> getHiddenPayments({sortby: 'name', ascending: true}) async {
-    return _getPayments(sortby, ascending, Filter.equals("hidden", true));
-  }
-
-  Future<List<Payment>> getRecurringPayments({sortby: 'name', ascending: true}) async {
-    return _getPayments(sortby, ascending, Filter.equals("recurring", true));
-  }
-
-  Future<List<Payment>> _getPayments(String sortby, bool ascending, Filter filter) async {
-    var finder = Finder(filter: filter,
-        sortOrders: [SortOrder(sortby, ascending)]);
+  Future<List<Payment>> _getPayments(
+      String sortby, bool ascending, Filter filter) async {
+    var finder =
+        Finder(filter: filter, sortOrders: [SortOrder(sortby, ascending)]);
     final recordSnapshot = await _paymentFolder.find(await _db, finder: finder);
     return recordSnapshot.map((snapshot) {
       final payment = Payment.fromJson(snapshot.value);
