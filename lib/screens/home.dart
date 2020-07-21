@@ -1,7 +1,8 @@
-import 'package:duedate/db/payment_dao.dart';
-import 'package:duedate/models/filter_type.dart';
+import 'package:duedate/models/enums.dart';
 import 'package:duedate/models/payment.dart';
+import 'package:duedate/models/payment_event.dart';
 import 'package:duedate/screens/settings.dart';
+import 'package:duedate/widgets/dd_inheritedwidget.dart';
 import 'package:flutter/material.dart';
 import 'package:duedate/screens/edit.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -12,20 +13,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final PaymentDAO _paymentDAO = PaymentDAO();
   final SlidableController slidableController = SlidableController();
-  Future<List<Payment>> _paymentsFuture;
   FilterType _selectedView;
 
   @override
   void initState() {
     super.initState();
     _selectedView = FilterType.UnCompleted;
-    _paymentsFuture = _getPayments();
-  }
-
-  Future<List<Payment>> _getPayments() async {
-    return _paymentDAO.getPayments(filterType: _selectedView);
   }
 
   CheckedPopupMenuItem<FilterType> _getPopupMenuItem(
@@ -48,14 +42,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     Scaffold.of(context).showSnackBar(snackBar);
-  }
-
-  void _insertPayment(Payment payment) {
-    _paymentDAO.insert(payment).then((result) {
-      setState(() {
-        _paymentsFuture = _getPayments();
-      });
-    });
   }
 
   _showDeleteConfirmation(BuildContext context,
@@ -109,22 +95,21 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: FutureBuilder<List<Payment>>(
-        future: _paymentsFuture,
+      body: StreamBuilder<List<Payment>>(
+        stream: InheritedData.of(context).payments,
+        initialData: [],
         builder: (BuildContext context, AsyncSnapshot<List<Payment>> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasData) {
-              final _paymentsList = snapshot.data;
-              return mainListView(context, _paymentsList);
-            } else if (snapshot.hasError) {
-              return Center(
-                child: Text("Error: ${snapshot.error.toString()}"),
-              );
-            }
+          if (snapshot.hasData) {
+            return mainListView(context, snapshot.data);
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text("Error: ${snapshot.error.toString()}"),
+            );
+          } else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
           }
-          return Center(
-            child: CircularProgressIndicator(),
-          );
         },
       ),
       bottomNavigationBar: BottomAppBar(
@@ -135,8 +120,8 @@ class _HomeScreenState extends State<HomeScreen> {
           children: <Widget>[
             PopupMenuButton<FilterType>(
               onSelected: (value) {
-                setState(() => _selectedView = value);
-                _paymentsFuture = _getPayments();
+                _selectedView = value;
+                InheritedData.of(context).filterType.add(value);
               },
               icon: Icon(Icons.filter_list),
               itemBuilder: (_) => [
@@ -165,7 +150,10 @@ class _HomeScreenState extends State<HomeScreen> {
           );
 
           if (payment != null) {
-            _insertPayment(payment);
+            InheritedData.of(context).crud.add(PaymentEvent(
+                  operation: BlocOperation.Insert,
+                  payment: payment,
+                ));
           }
         },
         tooltip: 'Do Action',
@@ -175,94 +163,90 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget mainListView(BuildContext context, List<Payment> _payments) {
-    return RefreshIndicator(
-      onRefresh: () async {
-        _paymentsFuture = _getPayments();
-      },
-      child: ListView.builder(
-        itemCount: _payments.length,
-        itemBuilder: (context, index) {
-          return Slidable(
-            actionPane: SlidableBehindActionPane(),
-            actionExtentRatio: 0.25,
-            controller: slidableController,
-            child: Container(
+    return ListView.builder(
+      itemCount: _payments.length,
+      itemBuilder: (context, index) {
+        return Slidable(
+          actionPane: SlidableBehindActionPane(),
+          actionExtentRatio: 0.25,
+          controller: slidableController,
+          child: Container(
+            color: _payments[index].color,
+            child: Card(
+              //                           <-- Card widget
               color: _payments[index].color,
-              child: Card(
-                //                           <-- Card widget
-                color: _payments[index].color,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(0.0),
-                ),
-                child: ListTile(
-                  leading: Icon(_payments[index].icon),
-                  title: Text(_payments[index].name),
-                  subtitle: Text("Due: ${_payments[index].formatDueDate()}"),
-                  trailing: Icon(Icons.keyboard_arrow_right),
-                  onTap: () async {
-                    final payment = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            EditScreen(payment: _payments[index]),
-                      ),
-                    );
-
-                    if (payment != null) {
-                      _paymentDAO.update(payment).then((result) {
-                        setState(() {
-                          _paymentsFuture = _getPayments();
-                        });
-                      });
-                    }
-                  },
-                ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(0.0),
               ),
-            ),
-            actions: <Widget>[
-              IconSlideAction(
-                caption: 'Delete',
-                color: Colors.red,
-                icon: Icons.delete,
-                onTap: () {
-                  Payment currentPayment = _payments[index];
-                  _showDeleteConfirmation(context, cancelPressed: () {
-                    Navigator.pop(context);
-                  }, continuePressed: () {
-                    _paymentDAO.delete(_payments[index]).then((result) {
-                      Navigator.pop(context);
-                      setState(() {
-                        _paymentsFuture = _getPayments();
-                      });
-                    });
-                    _showSnackBar(
-                      context,
-                      text: "Delete ${currentPayment.name}",
-                      actionText: "Undo",
-                      actionOnPressed: () {
-                        _insertPayment(currentPayment);
-                      },
-                    );
-                  });
+              child: ListTile(
+                leading: Icon(_payments[index].icon),
+                title: Text(_payments[index].name),
+                subtitle: Text("Due: ${_payments[index].formatDueDate()}"),
+                trailing: Icon(Icons.keyboard_arrow_right),
+                onTap: () async {
+                  final payment = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          EditScreen(payment: _payments[index]),
+                    ),
+                  );
+
+                  if (payment != null) {
+                    InheritedData.of(context).crud.add(PaymentEvent(
+                      operation: BlocOperation.Update,
+                      payment: payment,
+                    ));
+                  }
                 },
               ),
-            ],
-            secondaryActions: <Widget>[
-              IconSlideAction(
-                caption: 'Archive',
-                color: Colors.blue,
-                icon: Icons.archive,
-                onTap: () => _showSnackBar(
-                  context,
-                  text: 'Archive',
-                  actionText: "Undo",
-                  actionOnPressed: () {},
-                ),
+            ),
+          ),
+          actions: <Widget>[
+            IconSlideAction(
+              caption: 'Delete',
+              color: Colors.red,
+              icon: Icons.delete,
+              onTap: () {
+                Payment currentPayment = _payments[index];
+                _showDeleteConfirmation(context, cancelPressed: () {
+                  Navigator.pop(context);
+                }, continuePressed: () {
+                  InheritedData.of(context).crud.add(PaymentEvent(
+                    operation: BlocOperation.Delete,
+                    payment: _payments[index],
+                  ));
+                  Navigator.pop(context);
+                  _showSnackBar(
+                    context,
+                    text: "Delete ${currentPayment.name}",
+                    actionText: "Undo",
+                    actionOnPressed: () {
+                      InheritedData.of(context).crud.add(PaymentEvent(
+                        operation: BlocOperation.Insert,
+                        payment: currentPayment,
+                      ));
+                    },
+                  );
+                });
+              },
+            ),
+          ],
+          secondaryActions: <Widget>[
+            IconSlideAction(
+              caption: 'Archive',
+              color: Colors.blue,
+              icon: Icons.archive,
+              onTap: () => _showSnackBar(
+                context,
+                text: 'Archive',
+                actionText: "Undo",
+                actionOnPressed: () {},
               ),
-            ],
-          );
-        },
-      ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

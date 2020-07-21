@@ -1,4 +1,4 @@
-import 'package:duedate/models/filter_type.dart';
+import 'package:duedate/models/enums.dart';
 import 'package:sembast/sembast.dart';
 import '../models/payment.dart';
 import 'database_setup.dart';
