@@ -19,14 +19,10 @@ class DueDateBloc {
   var _payments = <Payment>[];
 
   DueDateBloc() {
-    _loadPayments().then((_) {
-      _paymentsSubject.add(_payments);
-    });
+    _loadAndPopulateStream();
     
     _filterTypeController.stream.listen((filterType) {
-      _loadPayments(filterType: filterType).then((_) {
-        _paymentsSubject.add(_payments);
-      });
+      _loadAndPopulateStream(filterType: filterType);
     });
 
     _crudPaymentController.stream.listen((paymentEvent) {
@@ -34,32 +30,32 @@ class DueDateBloc {
         case BlocOperation.Insert:
           {
             _insertPayment(paymentEvent.payment).then((_) {
-              _loadPayments().then((_) {
-                _paymentsSubject.add(_payments);
-              });
+              _loadAndPopulateStream();
             });
           }
           break;
         case BlocOperation.Delete:
           {
             _deletePayment(paymentEvent.payment).then((_) {
-              _loadPayments().then((_) {
-                _paymentsSubject.add(_payments);
-              });
+              _loadAndPopulateStream();
             });
           }
           break;
         case BlocOperation.Update:
           {
             _updatePayment(paymentEvent.payment).then((_) {
-              _loadPayments().then((_) {
-                _paymentsSubject.add(_payments);
-              });
+              _loadAndPopulateStream();
             });
           }
           break;
       }
 
+    });
+  }
+
+  void _loadAndPopulateStream({filterType: FilterType.All}) {
+    _loadPayments(filterType: filterType).then((_) {
+      _paymentsSubject.add(_payments);
     });
   }
 

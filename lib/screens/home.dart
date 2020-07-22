@@ -171,12 +171,12 @@ class _HomeScreenState extends State<HomeScreen> {
           actionExtentRatio: 0.25,
           controller: slidableController,
           child: Container(
-            color: _payments[index].color,
+            //color: _payments[index].color,
             child: Card(
               //                           <-- Card widget
               color: _payments[index].color,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(0.0),
+                borderRadius: BorderRadius.circular(5.0),
               ),
               child: ListTile(
                 leading: Icon(_payments[index].icon),
@@ -234,9 +234,20 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
           secondaryActions: <Widget>[
             IconSlideAction(
-              caption: 'Archive',
-              color: Colors.blue,
-              icon: Icons.archive,
+              caption: 'Share',
+              color: Colors.blueGrey,
+              icon: Icons.share,
+              onTap: () => _showSnackBar(
+                context,
+                text: 'Archive',
+                actionText: "Undo",
+                actionOnPressed: () {},
+              ),
+            ),
+            IconSlideAction(
+              caption: 'Complete',
+              color: Colors.green,
+              icon: Icons.check,
               onTap: () => _showSnackBar(
                 context,
                 text: 'Archive',
