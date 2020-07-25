@@ -2,6 +2,7 @@ import 'package:duedate/models/enums.dart';
 import 'package:duedate/models/payment.dart';
 import 'package:duedate/models/payment_event.dart';
 import 'package:duedate/screens/settings.dart';
+import 'package:duedate/widgets/DueDateSearch.dart';
 import 'package:duedate/widgets/dd_inheritedwidget.dart';
 import 'package:flutter/material.dart';
 import 'package:duedate/screens/edit.dart';
@@ -134,7 +135,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             IconButton(
               icon: Icon(Icons.search),
-              onPressed: () {},
+              onPressed: () {
+                showSearch(
+                  context: context,
+                  delegate: DueDateSearch(),
+                );
+              },
             ),
           ],
         ),
@@ -194,10 +200,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   if (payment != null) {
                     InheritedData.of(context).crud.add(PaymentEvent(
-                      operation: BlocOperation.Update,
-                      payment: payment,
-                    ));
+                          operation: BlocOperation.Update,
+                          payment: payment,
+                        ));
                   }
+                  
                 },
               ),
             ),
@@ -213,9 +220,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.pop(context);
                 }, continuePressed: () {
                   InheritedData.of(context).crud.add(PaymentEvent(
-                    operation: BlocOperation.Delete,
-                    payment: _payments[index],
-                  ));
+                        operation: BlocOperation.Delete,
+                        payment: _payments[index],
+                      ));
                   Navigator.pop(context);
                   _showSnackBar(
                     context,
@@ -223,9 +230,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     actionText: "Undo",
                     actionOnPressed: () {
                       InheritedData.of(context).crud.add(PaymentEvent(
-                        operation: BlocOperation.Insert,
-                        payment: currentPayment,
-                      ));
+                            operation: BlocOperation.Insert,
+                            payment: currentPayment,
+                          ));
                     },
                   );
                 });

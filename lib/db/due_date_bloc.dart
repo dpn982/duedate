@@ -8,11 +8,10 @@ import 'dart:async';
 class DueDateBloc {
   final PaymentDAO _paymentDAO = new PaymentDAO();
   final _paymentsSubject = BehaviorSubject<List<Payment>>();
+
   final _filterTypeController = StreamController<FilterType>();
   final _crudPaymentController = StreamController<PaymentEvent>();
-
   Stream<List<Payment>> get payments => _paymentsSubject.stream;
-
   Sink<FilterType> get filterType => _filterTypeController.sink;
   Sink<PaymentEvent> get crud => _crudPaymentController.sink;
 
@@ -49,7 +48,6 @@ class DueDateBloc {
           }
           break;
       }
-
     });
   }
 

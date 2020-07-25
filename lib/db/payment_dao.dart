@@ -24,6 +24,19 @@ class PaymentDAO {
     return await _paymentFolder.delete(await _db, finder: finder);
   }
 
+  Future<List<Payment>> getPaymentsByName(String query) async {
+    final finder = Finder(
+      filter:
+          Filter.matches("name", ".*${query.trim()}.*", anyInList: false),
+    );
+    var recordSnapshot = await _paymentFolder.find(await _db, finder: finder);
+    return recordSnapshot.map((snapshot) {
+      final payment = Payment.fromJson(snapshot.value);
+      payment.id = snapshot.key;
+      return payment;
+    }).toList();
+  }
+
   Future<List<Payment>> getPayments(
       {sortby: 'name', ascending: true, filterType: FilterType.All}) async {
     Filter filter;
