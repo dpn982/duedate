@@ -47,31 +47,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   _showDeleteConfirmation(BuildContext context,
       {Function cancelPressed, Function continuePressed}) {
-    // set up the buttons
-    Widget cancelButton = FlatButton(
-      child: Text("Cancel"),
-      onPressed: () => cancelPressed(),
-    );
-    Widget continueButton = FlatButton(
-      child: Text("Continue"),
-      onPressed: () => continuePressed(),
-    );
-
-    // set up the AlertDialog
-    AlertDialog alert = AlertDialog(
-      title: Text("Delete Confirmation"),
-      content: Text("Are you sure you want to delete this item?"),
-      actions: [
-        cancelButton,
-        continueButton,
-      ],
-    );
-
-    // show the dialog
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return alert;
+        return AlertDialog(
+          title: Text("Delete Confirmation"),
+          content: Text("Are you sure you want to delete this item?"),
+          actions: [
+            FlatButton(
+              child: Text("Cancel"),
+              onPressed: () => cancelPressed(),
+            ),
+            FlatButton(
+              child: Text("Continue"),
+              onPressed: () => continuePressed(),
+            ),
+          ],
+        );
       },
     );
   }
@@ -204,7 +196,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           payment: payment,
                         ));
                   }
-                  
                 },
               ),
             ),
