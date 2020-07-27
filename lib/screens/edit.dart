@@ -1,9 +1,10 @@
 import 'package:duedate/models/payment.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 
 class EditScreen extends StatefulWidget {
-  Payment payment;
+  final Payment payment;
 
   EditScreen({Key key, @required this.payment}) : super(key: key);
 
@@ -16,12 +17,16 @@ class _EditScreenState extends State<EditScreen> {
   List<DropdownMenuItem<String>> _frequencyList = [];
   List<DropdownMenuItem<Color>> _colorList = [];
   List<DropdownMenuItem<IconData>> _iconList = [];
+  Payment _dirtyPayment;
+  Locale _locale;
+  NumberFormat _simpleCurrencyFormat;
 
   @override
   void initState() {
     super.initState();
-    if (widget.payment == null) {
-      widget.payment = Payment(
+    _dirtyPayment = widget.payment;
+    if (_dirtyPayment == null) {
+      _dirtyPayment = Payment(
           name: "",
           description: "",
           amount: 0.00,
@@ -41,6 +46,9 @@ class _EditScreenState extends State<EditScreen> {
     loadFrequencyUnits();
     loadColorList();
     loadIconList();
+    _locale = Localizations.localeOf(context);
+    _simpleCurrencyFormat =
+        NumberFormat.simpleCurrency(locale: _locale.toString());
   }
 
   void loadFrequencyUnits() {
@@ -143,7 +151,7 @@ class _EditScreenState extends State<EditScreen> {
 
   @override
   Widget build(BuildContext context) {
-    DateTime selectedDate = widget.payment.dueDate;
+    DateTime selectedDate = _dirtyPayment.dueDate;
     TextEditingController dueDateCtl = TextEditingController(
         text: selectedDate.toIso8601String().split('T')[0]);
 
@@ -159,257 +167,254 @@ class _EditScreenState extends State<EditScreen> {
     }
 
     return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.payment.name),
-          //backgroundColor: Colors.purple,
-          actions: <Widget>[
-            Padding(
-                padding: EdgeInsets.only(right: 20.0),
-                child: GestureDetector(
-                  onTap: () {
-                    final form = _formKey.currentState;
-                    if (form.validate()) {
-                      form.save();
-                      Navigator.pop(context, widget.payment);
+      appBar: AppBar(
+        title: Text(_dirtyPayment.name),
+        actions: <Widget>[
+          Padding(
+              padding: EdgeInsets.only(right: 20.0),
+              child: GestureDetector(
+                onTap: () {
+                  final form = _formKey.currentState;
+                  if (form.validate()) {
+                    form.save();
+                    Navigator.pop(context, _dirtyPayment);
+                  }
+                },
+                child: Icon(
+                  Icons.save,
+                  size: 26.0,
+                ),
+              )),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 15.0),
+                child: TextFormField(
+                  initialValue: _dirtyPayment.name,
+                  decoration: InputDecoration(
+                    labelText: 'Name',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'Please enter a name.';
                     }
+
+                    return null;
                   },
-                  child: Icon(
-                    Icons.save,
-                    size: 26.0,
+                  onSaved: (val) => setState(() => _dirtyPayment.name = val),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 15.0),
+                child: TextFormField(
+                  initialValue: _dirtyPayment.description,
+                  decoration: InputDecoration(
+                    labelText: 'Description',
+                    border: OutlineInputBorder(),
                   ),
-                )),
-          ],
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: SingleChildScrollView(
-            child: Form(
-                key: _formKey,
-                child: Column(children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 15.0),
-                    child: TextFormField(
-                      initialValue: widget.payment.name,
-                      decoration: InputDecoration(
-                        labelText: 'Name',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          return 'Please enter a name.';
-                        }
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'Please enter a description.';
+                    }
 
-                        return null;
-                      },
-                      onSaved: (val) =>
-                          setState(() => widget.payment.name = val),
-                    ),
+                    return null;
+                  },
+                  onSaved: (val) =>
+                      setState(() => _dirtyPayment.description = val),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 15.0),
+                child: TextFormField(
+                  keyboardType: TextInputType.number,
+                  initialValue: _dirtyPayment.amount.toString(),
+                  decoration: InputDecoration(
+                    prefixText: _simpleCurrencyFormat.currencySymbol,
+                    labelText: 'Amount',
+                    border: OutlineInputBorder(),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 15.0),
-                    child: TextFormField(
-                      initialValue: widget.payment.description,
-                      decoration: InputDecoration(
-                        labelText: 'Description',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          return 'Please enter a description.';
-                        }
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'Please enter an amount.';
+                    }
 
-                        return null;
-                      },
-                      onSaved: (val) =>
-                          setState(() => widget.payment.description = val),
-                    ),
+                    return null;
+                  },
+                  onSaved: (val) =>
+                      setState(() => _dirtyPayment.amount = double.parse(val)),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 15.0),
+                child: TextFormField(
+                  keyboardType: TextInputType.datetime,
+                  controller: dueDateCtl,
+                  decoration: InputDecoration(
+                    labelText: 'Due Date',
+                    border: OutlineInputBorder(),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 15.0),
-                    child: TextFormField(
-                      keyboardType: TextInputType.number,
-                      initialValue: widget.payment.amount.toString(),
-                      decoration: InputDecoration(
-                        prefixText: '\$',
-                        labelText: 'Amount',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          return 'Please enter an amount.';
-                        }
+                  onTap: () => _selectDueDate(context),
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'Please enter a due date.';
+                    }
 
-                        return null;
-                      },
-                      onSaved: (val) => setState(
-                          () => widget.payment.amount = double.parse(val)),
+                    return null;
+                  },
+                  onSaved: (val) => setState(
+                      () => _dirtyPayment.dueDate = DateTime.parse(val)),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 15.0),
+                child: SwitchListTile(
+                    title: const Text('Recurring Payment'),
+                    activeTrackColor: Colors.green,
+                    inactiveTrackColor: Colors.red,
+                    value: _dirtyPayment.recurring,
+                    onChanged: (bool val) =>
+                        setState(() => _dirtyPayment.recurring = val)),
+              ),
+              Visibility(
+                visible: _dirtyPayment.recurring == true,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 15.0),
+                  child: TextFormField(
+                    keyboardType: TextInputType.number,
+                    initialValue: _dirtyPayment.frequency.toString(),
+                    decoration: InputDecoration(
+                      labelText: 'Frequency',
+                      border: OutlineInputBorder(),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 15.0),
-                    child: TextFormField(
-                      keyboardType: TextInputType.datetime,
-                      controller: dueDateCtl,
-                      decoration: InputDecoration(
-                        labelText: 'Due Date',
-                        border: OutlineInputBorder(),
-                      ),
-                      onTap: () => _selectDueDate(context),
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          return 'Please enter a due date.';
-                        }
+                    validator: (value) {
+                      if (value.isEmpty && _dirtyPayment.recurring == true) {
+                        return 'Please enter a frequency.';
+                      }
 
-                        return null;
-                      },
-                      onSaved: (val) => setState(
-                          () => widget.payment.dueDate = DateTime.parse(val)),
+                      return null;
+                    },
+                    onSaved: (val) => setState(
+                        () => _dirtyPayment.frequency = int.parse(val)),
+                  ),
+                ),
+              ),
+              Visibility(
+                visible: _dirtyPayment.recurring == true,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 15.0),
+                  child: DropdownButtonFormField(
+                    hint: Text('Select Frequency Units'),
+                    items: _frequencyList,
+                    decoration: InputDecoration(
+                      labelText: 'Frequency Units',
+                      border: OutlineInputBorder(),
                     ),
+                    value: _dirtyPayment.frequencyUnits,
+                    onChanged: (value) {
+                      setState(() {
+                        _dirtyPayment.frequencyUnits = value;
+                      });
+                    },
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 15.0),
-                    child: SwitchListTile(
-                        title: const Text('Recurring Payment'),
-                        activeTrackColor: Colors.green,
-                        inactiveTrackColor: Colors.red,
-                        value: widget.payment.recurring,
-                        onChanged: (bool val) =>
-                            setState(() => widget.payment.recurring = val)),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 15.0),
+                child: DropdownButtonFormField(
+                  hint: Text('Select Color'),
+                  items: _colorList,
+                  decoration: InputDecoration(
+                    labelText: 'Color',
+                    border: OutlineInputBorder(),
                   ),
-                  Visibility(
-                    visible: widget.payment.recurring == true,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 15.0),
-                      child: TextFormField(
-                        keyboardType: TextInputType.number,
-                        initialValue: widget.payment.frequency.toString(),
-                        decoration: InputDecoration(
-                          labelText: 'Frequency',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value.isEmpty &&
-                              widget.payment.recurring == true) {
-                            return 'Please enter a frequency.';
-                          }
+                  value: _dirtyPayment.color,
+                  onChanged: (value) {
+                    setState(() {
+                      _dirtyPayment.color = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 15.0),
+                child: DropdownButtonFormField(
+                  hint: Text('Select Icon'),
+                  items: _iconList,
+                  decoration: InputDecoration(
+                    labelText: 'Icon',
+                    border: OutlineInputBorder(),
+                  ),
+                  value: _dirtyPayment.icon,
+                  onChanged: (value) {
+                    setState(() {
+                      _dirtyPayment.icon = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 15.0),
+                child: TextFormField(
+                  initialValue: _dirtyPayment.paymentMethod,
+                  decoration: InputDecoration(
+                    labelText: 'Payment Method',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'Please enter a payment method.';
+                    }
 
-                          return null;
-                        },
-                        onSaved: (val) => setState(
-                            () => widget.payment.frequency = int.parse(val)),
-                      ),
-                    ),
+                    return null;
+                  },
+                  onSaved: (val) =>
+                      setState(() => _dirtyPayment.paymentMethod = val),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 15.0),
+                child: SwitchListTile(
+                    title: const Text('Hidden'),
+                    activeTrackColor: Colors.green,
+                    inactiveTrackColor: Colors.red,
+                    value: _dirtyPayment.hidden,
+                    onChanged: (bool val) =>
+                        setState(() => _dirtyPayment.hidden = val)),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 15.0),
+                child: SwitchListTile(
+                    title: const Text('Completed'),
+                    activeTrackColor: Colors.green,
+                    inactiveTrackColor: Colors.red,
+                    value: _dirtyPayment.completed,
+                    onChanged: (bool val) =>
+                        setState(() => _dirtyPayment.completed = val)),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 15.0),
+                child: TextFormField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: 10,
+                  initialValue: _dirtyPayment.notes,
+                  decoration: InputDecoration(
+                    labelText: 'Notes',
+                    border: OutlineInputBorder(),
                   ),
-                  Visibility(
-                    visible: widget.payment.recurring == true,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 15.0),
-                      child: DropdownButtonFormField(
-                        hint: Text('Select Frequency Units'),
-                        items: _frequencyList,
-                        decoration: InputDecoration(
-                          labelText: 'Frequency Units',
-                          border: OutlineInputBorder(),
-                        ),
-                        value: widget.payment.frequencyUnits,
-                        onChanged: (value) {
-                          setState(() {
-                            widget.payment.frequencyUnits = value;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 15.0),
-                    child: DropdownButtonFormField(
-                      hint: Text('Select Color'),
-                      items: _colorList,
-                      decoration: InputDecoration(
-                        labelText: 'Color',
-                        border: OutlineInputBorder(),
-                      ),
-                      value: widget.payment.color,
-                      onChanged: (value) {
-                        setState(() {
-                          widget.payment.color = value;
-                        });
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 15.0),
-                    child: DropdownButtonFormField(
-                      hint: Text('Select Icon'),
-                      items: _iconList,
-                      decoration: InputDecoration(
-                        labelText: 'Icon',
-                        border: OutlineInputBorder(),
-                      ),
-                      value: widget.payment.icon,
-                      onChanged: (value) {
-                        setState(() {
-                          widget.payment.icon = value;
-                        });
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 15.0),
-                    child: TextFormField(
-                      initialValue: widget.payment.paymentMethod,
-                      decoration: InputDecoration(
-                        labelText: 'Payment Method',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          return 'Please enter a payment method.';
-                        }
-
-                        return null;
-                      },
-                      onSaved: (val) =>
-                          setState(() => widget.payment.paymentMethod = val),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 15.0),
-                    child: SwitchListTile(
-                        title: const Text('Hidden'),
-                        activeTrackColor: Colors.green,
-                        inactiveTrackColor: Colors.red,
-                        value: widget.payment.hidden,
-                        onChanged: (bool val) =>
-                            setState(() => widget.payment.hidden = val)),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 15.0),
-                    child: SwitchListTile(
-                        title: const Text('Completed'),
-                        activeTrackColor: Colors.green,
-                        inactiveTrackColor: Colors.red,
-                        value: widget.payment.completed,
-                        onChanged: (bool val) =>
-                            setState(() => widget.payment.completed = val)),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 15.0),
-                    child: TextFormField(
-                      keyboardType: TextInputType.multiline,
-                      maxLines: 10,
-                      initialValue: widget.payment.notes,
-                      decoration: InputDecoration(
-                        labelText: 'Notes',
-                        border: OutlineInputBorder(),
-                      ),
-                      onSaved: (val) =>
-                          setState(() => widget.payment.notes = val),
-                    ),
-                  ),
-                  // Add TextFormFields and RaisedButton here.
-                ])),
+                  onSaved: (val) => setState(() => _dirtyPayment.notes = val),
+                ),
+              ),
+            ]),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
