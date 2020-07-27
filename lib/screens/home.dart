@@ -2,7 +2,7 @@ import 'package:duedate/models/enums.dart';
 import 'package:duedate/models/payment.dart';
 import 'package:duedate/models/payment_event.dart';
 import 'package:duedate/screens/settings.dart';
-import 'package:duedate/widgets/DueDateSearch.dart';
+import 'package:duedate/widgets/due_date_search.dart';
 import 'package:duedate/widgets/dd_inheritedwidget.dart';
 import 'package:flutter/material.dart';
 import 'package:duedate/screens/edit.dart';
