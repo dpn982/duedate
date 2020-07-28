@@ -46,9 +46,6 @@ class _EditScreenState extends State<EditScreen> {
     loadFrequencyUnits();
     loadColorList();
     loadIconList();
-    _locale = Localizations.localeOf(context);
-    _simpleCurrencyFormat =
-        NumberFormat.simpleCurrency(locale: _locale.toString());
   }
 
   void loadFrequencyUnits() {
@@ -151,6 +148,9 @@ class _EditScreenState extends State<EditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _locale = Localizations.localeOf(context);
+    _simpleCurrencyFormat =
+        NumberFormat.simpleCurrency(locale: _locale.toString());
     DateTime selectedDate = _dirtyPayment.dueDate;
     TextEditingController dueDateCtl = TextEditingController(
         text: selectedDate.toIso8601String().split('T')[0]);
@@ -169,6 +169,7 @@ class _EditScreenState extends State<EditScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_dirtyPayment.name),
+        elevation: 0.0,
         actions: <Widget>[
           Padding(
               padding: EdgeInsets.only(right: 20.0),
