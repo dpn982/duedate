@@ -20,6 +20,13 @@ class _EditScreenState extends State<EditScreen> {
   Payment _dirtyPayment;
   Locale _locale;
   NumberFormat _simpleCurrencyFormat;
+  OutlineInputBorder outlineBorder = OutlineInputBorder(
+    borderSide: BorderSide(
+      width: 1.0,
+      color: Colors.black,
+    ),
+  );
+  static const EdgeInsetsGeometry fieldPadding = EdgeInsets.only(bottom: 15.0);
 
   @override
   void initState() {
@@ -27,21 +34,23 @@ class _EditScreenState extends State<EditScreen> {
     _dirtyPayment = widget.payment;
     if (_dirtyPayment == null) {
       _dirtyPayment = Payment(
-          name: "",
-          description: "",
-          amount: 0.00,
-          dueDate: DateTime.now(),
-          recurring: false,
-          frequency: null,
-          frequencyUnits: "SECONDS",
-          color: Colors.blue[500],
-          icon: Icons.payment,
-          paymentMethod: "",
-          interestPercentage: 0,
-          compoundedFrequency: "",
-          notes: "",
-          hidden: false,
-          completed: false);
+        name: "",
+        description: "",
+        amount: 0.00,
+        dueDate: DateTime.now(),
+        recurring: false,
+        frequency: null,
+        frequencyUnits: "SECONDS",
+        color: Colors.blue[500],
+        icon: Icons.payment,
+        paymentMethod: "",
+        interestPercentage: 0,
+        compoundedFrequency: "",
+        notes: "",
+        hidden: false,
+        completed: false,
+        completedDate: null,
+      );
     }
     loadFrequencyUnits();
     loadColorList();
@@ -112,6 +121,111 @@ class _EditScreenState extends State<EditScreen> {
     _iconList.add(generateIconMenuItem("Transit", Icons.directions_transit));
   }
 
+  Widget _generateDropDownFormField<T>({
+    String label,
+    String hint: "",
+    T value,
+    Function(T) onChanged,
+    bool visible: true,
+    List<DropdownMenuItem<T>> items,
+  }) {
+    return Visibility(
+      visible: visible,
+      child: Padding(
+        padding: fieldPadding,
+        child: DropdownButtonFormField(
+          hint: Text(hint),
+          items: items,
+          decoration: InputDecoration(
+            labelText: label,
+            labelStyle: TextStyle(
+              fontSize: 18.0,
+              color: Colors.black,
+            ),
+            fillColor: Colors.white,
+            focusColor: Colors.white,
+            filled: false,
+            enabledBorder: outlineBorder,
+            focusedBorder: outlineBorder,
+            border: outlineBorder,
+          ),
+          value: value,
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
+  Widget _generateTextFormField({
+    String label,
+    String initialValue,
+    String prefixText: "",
+    TextInputType inputType: TextInputType.text,
+    Function(String) validator,
+    Function(String) onSaved,
+    Function onTap,
+    TextEditingController controller,
+    bool visible: true,
+    int maxLines: 1,
+  }) {
+    return Visibility(
+      visible: visible,
+      child: Padding(
+        padding: fieldPadding,
+        child: TextFormField(
+          controller: controller,
+          keyboardType: inputType,
+          initialValue: initialValue,
+          maxLines: maxLines,
+          decoration: InputDecoration(
+            prefixText: prefixText,
+            labelText: label,
+            labelStyle: TextStyle(
+              fontSize: 18.0,
+              color: Colors.black,
+            ),
+            fillColor: Colors.white,
+            focusColor: Colors.white,
+            filled: false,
+            enabledBorder: outlineBorder,
+            focusedBorder: outlineBorder,
+            border: outlineBorder,
+          ),
+          onTap: onTap,
+          validator: validator,
+          onSaved: onSaved,
+        ),
+      ),
+    );
+  }
+
+  Widget _generateSwitchFormField({
+    String label,
+    bool value,
+    Function(bool) onChanged,
+    bool visible: true,
+  }) {
+    return Visibility(
+      visible: visible,
+      child: Padding(
+        padding: fieldPadding,
+        child: SwitchListTile(
+          title: Text(
+            label,
+            style: TextStyle(
+              fontSize: 18.0,
+              color: Colors.black,
+            ),
+          ),
+          activeTrackColor: Colors.green,
+          inactiveTrackColor: Colors.red,
+          value: value,
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
   DropdownMenuItem<Color> generateColorMenuItem(String text, Color value) {
     return DropdownMenuItem(
       child: Row(
@@ -152,8 +266,13 @@ class _EditScreenState extends State<EditScreen> {
     _simpleCurrencyFormat =
         NumberFormat.simpleCurrency(locale: _locale.toString());
     DateTime selectedDate = _dirtyPayment.dueDate;
+    DateTime selectedCompletedDate = (_dirtyPayment.completedDate == null)
+        ? DateTime.now()
+        : _dirtyPayment.completedDate;
     TextEditingController dueDateCtl = TextEditingController(
         text: selectedDate.toIso8601String().split('T')[0]);
+    TextEditingController completedDateCtl = TextEditingController(
+        text: selectedCompletedDate.toIso8601String().split('T')[0]);
 
     Future<Null> _selectDueDate(BuildContext context) async {
       final DateTime picked = await showDatePicker(
@@ -163,6 +282,18 @@ class _EditScreenState extends State<EditScreen> {
           lastDate: DateTime.now().add(Duration(days: 365)));
       if (picked != null && picked != selectedDate) {
         dueDateCtl.text = picked.toLocal().toIso8601String().split('T')[0];
+      }
+    }
+
+    Future<Null> _selectCompletedDate(BuildContext context) async {
+      final DateTime picked = await showDatePicker(
+          context: context,
+          initialDate: selectedCompletedDate,
+          firstDate: DateTime(2015, 8),
+          lastDate: DateTime.now().add(Duration(days: 365)));
+      if (picked != null && picked != selectedDate) {
+        completedDateCtl.text =
+            picked.toLocal().toIso8601String().split('T')[0];
       }
     }
 
@@ -194,223 +325,164 @@ class _EditScreenState extends State<EditScreen> {
           child: Form(
             key: _formKey,
             child: Column(children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(bottom: 15.0),
-                child: TextFormField(
-                  initialValue: _dirtyPayment.name,
-                  decoration: InputDecoration(
-                    labelText: 'Name',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return 'Please enter a name.';
-                    }
+              SizedBox(height: 8.0),
+              _generateTextFormField(
+                label: "Name",
+                initialValue: _dirtyPayment.name,
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter a name.';
+                  }
 
-                    return null;
-                  },
-                  onSaved: (val) => setState(() => _dirtyPayment.name = val),
-                ),
+                  return null;
+                },
+                onSaved: (val) => setState(() => _dirtyPayment.name = val),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 15.0),
-                child: TextFormField(
-                  initialValue: _dirtyPayment.description,
-                  decoration: InputDecoration(
-                    labelText: 'Description',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return 'Please enter a description.';
-                    }
+              _generateTextFormField(
+                label: "Description",
+                initialValue: _dirtyPayment.description,
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter a description.';
+                  }
 
-                    return null;
-                  },
-                  onSaved: (val) =>
-                      setState(() => _dirtyPayment.description = val),
-                ),
+                  return null;
+                },
+                onSaved: (val) =>
+                    setState(() => _dirtyPayment.description = val),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 15.0),
-                child: TextFormField(
-                  keyboardType: TextInputType.number,
-                  initialValue: _dirtyPayment.amount.toString(),
-                  decoration: InputDecoration(
-                    prefixText: _simpleCurrencyFormat.currencySymbol,
-                    labelText: 'Amount',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return 'Please enter an amount.';
-                    }
+              _generateTextFormField(
+                label: "Amount",
+                initialValue: _dirtyPayment.amount.toString(),
+                prefixText: _simpleCurrencyFormat.currencySymbol,
+                inputType: TextInputType.number,
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter an amount.';
+                  }
 
-                    return null;
-                  },
-                  onSaved: (val) =>
-                      setState(() => _dirtyPayment.amount = double.parse(val)),
-                ),
+                  return null;
+                },
+                onSaved: (val) =>
+                    setState(() => _dirtyPayment.amount = double.parse(val)),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 15.0),
-                child: TextFormField(
-                  keyboardType: TextInputType.datetime,
-                  controller: dueDateCtl,
-                  decoration: InputDecoration(
-                    labelText: 'Due Date',
-                    border: OutlineInputBorder(),
-                  ),
-                  onTap: () => _selectDueDate(context),
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return 'Please enter a due date.';
-                    }
+              _generateTextFormField(
+                label: "Due Date",
+                inputType: TextInputType.datetime,
+                controller: dueDateCtl,
+                onTap: () => _selectDueDate(context),
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter a due date.';
+                  }
 
-                    return null;
-                  },
-                  onSaved: (val) => setState(
-                      () => _dirtyPayment.dueDate = DateTime.parse(val)),
-                ),
+                  return null;
+                },
+                onSaved: (val) =>
+                    setState(() => _dirtyPayment.dueDate = DateTime.parse(val)),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 15.0),
-                child: SwitchListTile(
-                    title: const Text('Recurring Payment'),
-                    activeTrackColor: Colors.green,
-                    inactiveTrackColor: Colors.red,
-                    value: _dirtyPayment.recurring,
-                    onChanged: (bool val) =>
-                        setState(() => _dirtyPayment.recurring = val)),
+              _generateSwitchFormField(
+                label: "Recurring Payment",
+                value: _dirtyPayment.recurring,
+                onChanged: (bool val) =>
+                    setState(() => _dirtyPayment.recurring = val),
               ),
-              Visibility(
+              _generateTextFormField(
+                label: "Frequency",
                 visible: _dirtyPayment.recurring == true,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 15.0),
-                  child: TextFormField(
-                    keyboardType: TextInputType.number,
-                    initialValue: _dirtyPayment.frequency.toString(),
-                    decoration: InputDecoration(
-                      labelText: 'Frequency',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value.isEmpty && _dirtyPayment.recurring == true) {
-                        return 'Please enter a frequency.';
-                      }
+                inputType: TextInputType.number,
+                initialValue: _dirtyPayment.frequency.toString(),
+                validator: (value) {
+                  if (value.isEmpty && _dirtyPayment.recurring == true) {
+                    return 'Please enter a frequency.';
+                  }
 
-                      return null;
-                    },
-                    onSaved: (val) => setState(
-                        () => _dirtyPayment.frequency = int.parse(val)),
-                  ),
-                ),
+                  return null;
+                },
+                onSaved: (val) =>
+                    setState(() => _dirtyPayment.frequency = int.parse(val)),
               ),
-              Visibility(
+              _generateDropDownFormField<String>(
+                label: "Frequency Unis",
                 visible: _dirtyPayment.recurring == true,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 15.0),
-                  child: DropdownButtonFormField(
-                    hint: Text('Select Frequency Units'),
-                    items: _frequencyList,
-                    decoration: InputDecoration(
-                      labelText: 'Frequency Units',
-                      border: OutlineInputBorder(),
-                    ),
-                    value: _dirtyPayment.frequencyUnits,
-                    onChanged: (value) {
-                      setState(() {
-                        _dirtyPayment.frequencyUnits = value;
-                      });
-                    },
-                  ),
-                ),
+                hint: "Select Frequency Units",
+                items: _frequencyList,
+                value: _dirtyPayment.frequencyUnits,
+                onChanged: (value) {
+                  setState(() {
+                    _dirtyPayment.frequencyUnits = value;
+                  });
+                },
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 15.0),
-                child: DropdownButtonFormField(
-                  hint: Text('Select Color'),
-                  items: _colorList,
-                  decoration: InputDecoration(
-                    labelText: 'Color',
-                    border: OutlineInputBorder(),
-                  ),
-                  value: _dirtyPayment.color,
-                  onChanged: (value) {
-                    setState(() {
-                      _dirtyPayment.color = value;
-                    });
-                  },
-                ),
+              _generateDropDownFormField<Color>(
+                label: "Color",
+                hint: "Select Color",
+                value: _dirtyPayment.color,
+                items: _colorList,
+                onChanged: (value) {
+                  setState(() {
+                    _dirtyPayment.color = value;
+                  });
+                },
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 15.0),
-                child: DropdownButtonFormField(
-                  hint: Text('Select Icon'),
-                  items: _iconList,
-                  decoration: InputDecoration(
-                    labelText: 'Icon',
-                    border: OutlineInputBorder(),
-                  ),
-                  value: _dirtyPayment.icon,
-                  onChanged: (value) {
-                    setState(() {
-                      _dirtyPayment.icon = value;
-                    });
-                  },
-                ),
+              _generateDropDownFormField<IconData>(
+                label: "Icon",
+                hint: "Select Icon",
+                items: _iconList,
+                value: _dirtyPayment.icon,
+                onChanged: (value) {
+                  setState(() {
+                    _dirtyPayment.icon = value;
+                  });
+                },
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 15.0),
-                child: TextFormField(
-                  initialValue: _dirtyPayment.paymentMethod,
-                  decoration: InputDecoration(
-                    labelText: 'Payment Method',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return 'Please enter a payment method.';
-                    }
+              _generateTextFormField(
+                label: "Payment Method",
+                initialValue: _dirtyPayment.paymentMethod,
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter a payment method.';
+                  }
 
-                    return null;
-                  },
-                  onSaved: (val) =>
-                      setState(() => _dirtyPayment.paymentMethod = val),
-                ),
+                  return null;
+                },
+                onSaved: (val) =>
+                    setState(() => _dirtyPayment.paymentMethod = val),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 15.0),
-                child: SwitchListTile(
-                    title: const Text('Hidden'),
-                    activeTrackColor: Colors.green,
-                    inactiveTrackColor: Colors.red,
-                    value: _dirtyPayment.hidden,
-                    onChanged: (bool val) =>
-                        setState(() => _dirtyPayment.hidden = val)),
+              _generateSwitchFormField(
+                label: "Hidden",
+                value: _dirtyPayment.hidden,
+                onChanged: (bool val) =>
+                    setState(() => _dirtyPayment.hidden = val),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 15.0),
-                child: SwitchListTile(
-                    title: const Text('Completed'),
-                    activeTrackColor: Colors.green,
-                    inactiveTrackColor: Colors.red,
-                    value: _dirtyPayment.completed,
-                    onChanged: (bool val) =>
-                        setState(() => _dirtyPayment.completed = val)),
+              _generateSwitchFormField(
+                label: "Completed",
+                value: _dirtyPayment.completed,
+                onChanged: (bool val) =>
+                    setState(() => _dirtyPayment.completed = val),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 15.0),
-                child: TextFormField(
-                  keyboardType: TextInputType.multiline,
-                  maxLines: 10,
-                  initialValue: _dirtyPayment.notes,
-                  decoration: InputDecoration(
-                    labelText: 'Notes',
-                    border: OutlineInputBorder(),
-                  ),
-                  onSaved: (val) => setState(() => _dirtyPayment.notes = val),
-                ),
+              _generateTextFormField(
+                label: "Completed Date",
+                visible: _dirtyPayment.completed == true,
+                inputType: TextInputType.datetime,
+                controller: completedDateCtl,
+                onTap: () => _selectCompletedDate(context),
+                validator: (value) {
+                  if (value.isEmpty && _dirtyPayment.completed) {
+                    return 'Please enter a due date.';
+                  }
+
+                  return null;
+                },
+                onSaved: (val) => setState(
+                    () => _dirtyPayment.completedDate = DateTime.parse(val)),
+              ),
+              _generateTextFormField(
+                label: "Notes",
+                inputType: TextInputType.multiline,
+                maxLines: 10,
+                initialValue: _dirtyPayment.notes,
+                onSaved: (val) => setState(() => _dirtyPayment.notes = val),
               ),
             ]),
           ),

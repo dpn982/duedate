@@ -3,14 +3,15 @@ import 'package:flutter/material.dart';
 
 class InheritedData extends InheritedWidget {
   final DueDateBloc dueDateBloc;
+  final String title;
 
-  InheritedData(this.dueDateBloc, child) : super(child: child);
+  InheritedData(this.title, this.dueDateBloc, child) : super(child: child);
 
   @override
   bool updateShouldNotify(InheritedData old) =>
-      dueDateBloc != old.dueDateBloc;
+      title != old.title || dueDateBloc != old.dueDateBloc;
 
-  static DueDateBloc of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<InheritedData>().dueDateBloc;
+  static InheritedData of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<InheritedData>();
   }
 }

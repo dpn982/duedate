@@ -7,6 +7,7 @@ import 'package:duedate/widgets/dd_inheritedwidget.dart';
 import 'package:flutter/material.dart';
 import 'package:duedate/screens/edit.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -72,8 +73,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: Icon(Icons.calendar_today),
-        title: Text('Due Date'),
+        elevation: 0.0,
+        //leading: Icon(Icons.calendar_today),
+        title: Text(InheritedData.of(context).title),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.settings),
@@ -89,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: StreamBuilder<List<Payment>>(
-        stream: InheritedData.of(context).payments,
+        stream: InheritedData.of(context).dueDateBloc.payments,
         initialData: [],
         builder: (BuildContext context, AsyncSnapshot<List<Payment>> snapshot) {
           if (snapshot.hasData) {
@@ -106,7 +108,6 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
       bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
         child: Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -114,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
             PopupMenuButton<FilterType>(
               onSelected: (value) {
                 _selectedView = value;
-                InheritedData.of(context).filterType.add(value);
+                InheritedData.of(context).dueDateBloc.filterType.add(value);
               },
               icon: Icon(Icons.filter_list),
               itemBuilder: (_) => [
@@ -148,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
 
           if (payment != null) {
-            InheritedData.of(context).crud.add(PaymentEvent(
+            InheritedData.of(context).dueDateBloc.crud.add(PaymentEvent(
                   operation: BlocOperation.Insert,
                   payment: payment,
                 ));
@@ -156,11 +157,14 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         tooltip: 'Do Action',
         child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 
   Widget mainListView(BuildContext context, List<Payment> _payments) {
+    Locale _locale = Localizations.localeOf(context);
+    NumberFormat _simpleCurrencyFormat =
+        NumberFormat.simpleCurrency(locale: _locale.toString());
     return ListView.builder(
       itemCount: _payments.length,
       itemBuilder: (context, index) {
@@ -169,18 +173,29 @@ class _HomeScreenState extends State<HomeScreen> {
           actionExtentRatio: 0.25,
           controller: slidableController,
           child: Container(
-            //color: _payments[index].color,
             child: Card(
-              //                           <-- Card widget
-              color: _payments[index].color,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5.0),
+                side: BorderSide(
+                  color: _payments[index].color,
+                  width: 3.0,
+                ),
               ),
               child: ListTile(
-                leading: Icon(_payments[index].icon),
+                leading: Icon(
+                  _payments[index].icon,
+                  color: _payments[index].color,
+                ),
                 title: Text(_payments[index].name),
-                subtitle: Text("Due: ${_payments[index].formatDueDate()}"),
-                trailing: Icon(Icons.keyboard_arrow_right),
+                subtitle: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Due: ${_payments[index].formatDueDate()}"),
+                    Text(
+                        "Amount: ${_simpleCurrencyFormat.currencySymbol}${_payments[index].amount.toStringAsFixed(2)}"),
+                  ],
+                ),
+                //trailing: Icon(Icons.keyboard_arrow_right),
                 onTap: () async {
                   final payment = await Navigator.push(
                     context,
@@ -191,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
 
                   if (payment != null) {
-                    InheritedData.of(context).crud.add(PaymentEvent(
+                    InheritedData.of(context).dueDateBloc.crud.add(PaymentEvent(
                           operation: BlocOperation.Update,
                           payment: payment,
                         ));
@@ -210,7 +225,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 _showDeleteConfirmation(context, cancelPressed: () {
                   Navigator.pop(context);
                 }, continuePressed: () {
-                  InheritedData.of(context).crud.add(PaymentEvent(
+                  InheritedData.of(context).dueDateBloc.crud.add(PaymentEvent(
                         operation: BlocOperation.Delete,
                         payment: _payments[index],
                       ));
@@ -220,7 +235,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     text: "Delete ${currentPayment.name}",
                     actionText: "Undo",
                     actionOnPressed: () {
-                      InheritedData.of(context).crud.add(PaymentEvent(
+                      InheritedData.of(context)
+                          .dueDateBloc
+                          .crud
+                          .add(PaymentEvent(
                             operation: BlocOperation.Insert,
                             payment: currentPayment,
                           ));

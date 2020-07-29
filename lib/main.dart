@@ -18,10 +18,21 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
+      theme: ThemeData(
+        primaryColor: Color(0xFF045D56),
+        scaffoldBackgroundColor: Color(0xFF045D56),
+        bottomAppBarTheme: BottomAppBarTheme(
+          shape: const CircularNotchedRectangle(),
+          elevation: 0.0,
+          color: Color(0xFF344955),
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: Color(0xFFF9AA33),
+          foregroundColor: Colors.black,
+        ),
+      ),
       home: InheritedData(
+        "",
         dueDateBloc,
         HomeScreen(),
       ),
