@@ -1,4 +1,7 @@
 import 'package:duedate/models/payment.dart';
+import 'package:duedate/widgets/dd_dropdownformfield.dart';
+import 'package:duedate/widgets/dd_switchformfield.dart';
+import 'package:duedate/widgets/dd_textformfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
@@ -121,111 +124,6 @@ class _EditScreenState extends State<EditScreen> {
     _iconList.add(generateIconMenuItem("Transit", Icons.directions_transit));
   }
 
-  Widget _generateDropDownFormField<T>({
-    String label,
-    String hint: "",
-    T value,
-    Function(T) onChanged,
-    bool visible: true,
-    List<DropdownMenuItem<T>> items,
-  }) {
-    return Visibility(
-      visible: visible,
-      child: Padding(
-        padding: fieldPadding,
-        child: DropdownButtonFormField(
-          hint: Text(hint),
-          items: items,
-          decoration: InputDecoration(
-            labelText: label,
-            labelStyle: TextStyle(
-              fontSize: 18.0,
-              color: Colors.black,
-            ),
-            fillColor: Colors.white,
-            focusColor: Colors.white,
-            filled: false,
-            enabledBorder: outlineBorder,
-            focusedBorder: outlineBorder,
-            border: outlineBorder,
-          ),
-          value: value,
-          onChanged: onChanged,
-        ),
-      ),
-    );
-  }
-
-  Widget _generateTextFormField({
-    String label,
-    String initialValue,
-    String prefixText: "",
-    TextInputType inputType: TextInputType.text,
-    Function(String) validator,
-    Function(String) onSaved,
-    Function onTap,
-    TextEditingController controller,
-    bool visible: true,
-    int maxLines: 1,
-  }) {
-    return Visibility(
-      visible: visible,
-      child: Padding(
-        padding: fieldPadding,
-        child: TextFormField(
-          controller: controller,
-          keyboardType: inputType,
-          initialValue: initialValue,
-          maxLines: maxLines,
-          decoration: InputDecoration(
-            prefixText: prefixText,
-            labelText: label,
-            labelStyle: TextStyle(
-              fontSize: 18.0,
-              color: Colors.black,
-            ),
-            fillColor: Colors.white,
-            focusColor: Colors.white,
-            filled: false,
-            enabledBorder: outlineBorder,
-            focusedBorder: outlineBorder,
-            border: outlineBorder,
-          ),
-          onTap: onTap,
-          validator: validator,
-          onSaved: onSaved,
-        ),
-      ),
-    );
-  }
-
-  Widget _generateSwitchFormField({
-    String label,
-    bool value,
-    Function(bool) onChanged,
-    bool visible: true,
-  }) {
-    return Visibility(
-      visible: visible,
-      child: Padding(
-        padding: fieldPadding,
-        child: SwitchListTile(
-          title: Text(
-            label,
-            style: TextStyle(
-              fontSize: 18.0,
-              color: Colors.black,
-            ),
-          ),
-          activeTrackColor: Colors.green,
-          inactiveTrackColor: Colors.red,
-          value: value,
-          onChanged: onChanged,
-        ),
-      ),
-    );
-  }
-
   DropdownMenuItem<Color> generateColorMenuItem(String text, Color value) {
     return DropdownMenuItem(
       child: Row(
@@ -326,7 +224,7 @@ class _EditScreenState extends State<EditScreen> {
             key: _formKey,
             child: Column(children: <Widget>[
               SizedBox(height: 8.0),
-              _generateTextFormField(
+              CustomTextFormField(
                 label: "Name",
                 initialValue: _dirtyPayment.name,
                 validator: (value) {
@@ -338,7 +236,7 @@ class _EditScreenState extends State<EditScreen> {
                 },
                 onSaved: (val) => setState(() => _dirtyPayment.name = val),
               ),
-              _generateTextFormField(
+              CustomTextFormField(
                 label: "Description",
                 initialValue: _dirtyPayment.description,
                 validator: (value) {
@@ -351,7 +249,7 @@ class _EditScreenState extends State<EditScreen> {
                 onSaved: (val) =>
                     setState(() => _dirtyPayment.description = val),
               ),
-              _generateTextFormField(
+              CustomTextFormField(
                 label: "Amount",
                 initialValue: _dirtyPayment.amount.toString(),
                 prefixText: _simpleCurrencyFormat.currencySymbol,
@@ -366,7 +264,7 @@ class _EditScreenState extends State<EditScreen> {
                 onSaved: (val) =>
                     setState(() => _dirtyPayment.amount = double.parse(val)),
               ),
-              _generateTextFormField(
+              CustomTextFormField(
                 label: "Due Date",
                 inputType: TextInputType.datetime,
                 controller: dueDateCtl,
@@ -381,13 +279,13 @@ class _EditScreenState extends State<EditScreen> {
                 onSaved: (val) =>
                     setState(() => _dirtyPayment.dueDate = DateTime.parse(val)),
               ),
-              _generateSwitchFormField(
+              CustomSwitchFormField(
                 label: "Recurring Payment",
                 value: _dirtyPayment.recurring,
                 onChanged: (bool val) =>
                     setState(() => _dirtyPayment.recurring = val),
               ),
-              _generateTextFormField(
+              CustomTextFormField(
                 label: "Frequency",
                 visible: _dirtyPayment.recurring == true,
                 inputType: TextInputType.number,
@@ -402,7 +300,7 @@ class _EditScreenState extends State<EditScreen> {
                 onSaved: (val) =>
                     setState(() => _dirtyPayment.frequency = int.parse(val)),
               ),
-              _generateDropDownFormField<String>(
+              CustomDropdownFormField<String>(
                 label: "Frequency Unis",
                 visible: _dirtyPayment.recurring == true,
                 hint: "Select Frequency Units",
@@ -414,7 +312,7 @@ class _EditScreenState extends State<EditScreen> {
                   });
                 },
               ),
-              _generateDropDownFormField<Color>(
+              CustomDropdownFormField<Color>(
                 label: "Color",
                 hint: "Select Color",
                 value: _dirtyPayment.color,
@@ -425,7 +323,7 @@ class _EditScreenState extends State<EditScreen> {
                   });
                 },
               ),
-              _generateDropDownFormField<IconData>(
+              CustomDropdownFormField<IconData>(
                 label: "Icon",
                 hint: "Select Icon",
                 items: _iconList,
@@ -436,7 +334,7 @@ class _EditScreenState extends State<EditScreen> {
                   });
                 },
               ),
-              _generateTextFormField(
+              CustomTextFormField(
                 label: "Payment Method",
                 initialValue: _dirtyPayment.paymentMethod,
                 validator: (value) {
@@ -449,19 +347,19 @@ class _EditScreenState extends State<EditScreen> {
                 onSaved: (val) =>
                     setState(() => _dirtyPayment.paymentMethod = val),
               ),
-              _generateSwitchFormField(
+              CustomSwitchFormField(
                 label: "Hidden",
                 value: _dirtyPayment.hidden,
                 onChanged: (bool val) =>
                     setState(() => _dirtyPayment.hidden = val),
               ),
-              _generateSwitchFormField(
+              CustomSwitchFormField(
                 label: "Completed",
                 value: _dirtyPayment.completed,
                 onChanged: (bool val) =>
                     setState(() => _dirtyPayment.completed = val),
               ),
-              _generateTextFormField(
+              CustomTextFormField(
                 label: "Completed Date",
                 visible: _dirtyPayment.completed == true,
                 inputType: TextInputType.datetime,
@@ -477,7 +375,7 @@ class _EditScreenState extends State<EditScreen> {
                 onSaved: (val) => setState(
                     () => _dirtyPayment.completedDate = DateTime.parse(val)),
               ),
-              _generateTextFormField(
+              CustomTextFormField(
                 label: "Notes",
                 inputType: TextInputType.multiline,
                 maxLines: 10,

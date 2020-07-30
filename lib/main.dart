@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       home: InheritedData(
-        "",
+        "Due Date",
         dueDateBloc,
         HomeScreen(),
       ),

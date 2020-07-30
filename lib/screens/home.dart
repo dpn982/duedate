@@ -74,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0.0,
-        //leading: Icon(Icons.calendar_today),
+        leading: Icon(Icons.calendar_today),
         title: Text(InheritedData.of(context).title),
         actions: <Widget>[
           IconButton(
