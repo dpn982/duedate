@@ -19,12 +19,16 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        primaryColor: Color(0xFF045D56),
-        scaffoldBackgroundColor: Color(0xFF045D56),
+        primaryColor: Color(0xFFF9AA33),
+        scaffoldBackgroundColor: Color(0xFF344955),
         bottomAppBarTheme: BottomAppBarTheme(
           shape: const CircularNotchedRectangle(),
           elevation: 0.0,
-          color: Color(0xFF344955),
+          color: Color(0xFF232F34),
+        ),
+        cardTheme: CardTheme(
+          elevation: 0.0,
+          color: Colors.transparent,
         ),
         floatingActionButtonTheme: FloatingActionButtonThemeData(
           backgroundColor: Color(0xFFF9AA33),

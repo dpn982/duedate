@@ -117,7 +117,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 _selectedView = value;
                 InheritedData.of(context).dueDateBloc.filterType.add(value);
               },
-              icon: Icon(Icons.filter_list),
+              icon: Icon(
+                Icons.filter_list,
+                color: Color(0xFFF9AA33),
+              ),
               itemBuilder: (_) => [
                 _getPopupMenuItem("Completed", FilterType.Completed),
                 _getPopupMenuItem("Uncompleted", FilterType.UnCompleted),
@@ -127,7 +130,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             IconButton(
-              icon: Icon(Icons.search),
+              icon: Icon(
+                Icons.search,
+                color: Color(0xFFF9AA33),
+              ),
               onPressed: () {
                 showSearch(
                   context: context,
@@ -177,15 +183,32 @@ class _HomeScreenState extends State<HomeScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5.0),
                 side: BorderSide(
-                  color: _payments[index].color,
-                  width: 3.0,
+                  color: Colors.black,
+                  width: 1.0,
                 ),
               ),
               child: ListTile(
-                leading: Icon(
-                  _payments[index].icon,
-                  color: _payments[index].color,
+                leading: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 5.0,
+                      height: 42.0,
+                      child: DecoratedBox(
+                        decoration:
+                            BoxDecoration(color: _payments[index].color),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 10.0,
+                    ),
+                    Icon(
+                      _payments[index].icon,
+                      //color: _payments[index].color,
+                    ),
+                  ],
                 ),
+
                 title: Text(_payments[index].name),
                 subtitle: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
