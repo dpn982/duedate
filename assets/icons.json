@@ -1,0 +1,86 @@
+[
+	{
+		"name": "Phone",
+		"value": "phone_android",
+		"font": "MaterialIcons",
+		"code": 58148
+	},
+	{
+		"name": "Payment",
+		"value": "payment",
+		"font": "MaterialIcons",
+		"code": 59553
+	},
+	{
+		"name": "Airplane",
+		"value": "airplanemode_active",
+		"font": "MaterialIcons",
+		"code": 57749
+	},
+	{
+		"name": "Bank",
+		"value": "account_balance",
+		"font": "MaterialIcons",
+		"code": 59471
+	},
+	{
+		"name": "Airplane",
+		"value": "airplanemode_active",
+		"font": "MaterialIcons",
+		"code": 57749
+	},
+	{
+		"name": "House",
+		"value": "home",
+		"font": "MaterialIcons",
+		"code": 59530
+	},
+	{
+		"name": "Money",
+		"value": "attach_money",
+		"font": "MaterialIcons",
+		"code": 57895
+	},
+	{
+		"name": "Beach",
+		"value": "beach_access",
+		"font": "MaterialIcons",
+		"code": 60222
+	},
+	{
+		"name": "Video Game",
+		"value": "videogame_asset",
+		"font": "MaterialIcons",
+		"code": 58168
+	},
+	{
+		"name": "Book",
+		"value": "book",
+		"font": "MaterialIcons",
+		"code": 59493
+	},
+	{
+		"name": "Membership",
+		"value": "card_membership",
+		"font": "MaterialIcons",
+		"code": 59639
+	},
+	{
+		"name": "Travel",
+		"value": "card_travel",
+		"font": "MaterialIcons",
+		"code": 59640
+	},
+	{
+		"name": "Gambling",
+		"value": "casino",
+		"font": "MaterialIcons",
+		"code": 60224
+	},
+	{
+		"name": "Transit",
+		"value": "directions_transit",
+		"font": "MaterialIcons",
+		"code": 58677
+	},
+]
