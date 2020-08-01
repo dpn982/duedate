@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:duedate/models/payment.dart';
 import 'package:duedate/widgets/dd_dropdownformfield.dart';
 import 'package:duedate/widgets/dd_switchformfield.dart';
@@ -5,6 +7,7 @@ import 'package:duedate/widgets/dd_textformfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 
 class EditScreen extends StatefulWidget {
   final Payment payment;
@@ -107,21 +110,29 @@ class _EditScreenState extends State<EditScreen> {
     _colorList.add(generateColorMenuItem("Amber", Colors.amber[500]));
   }
 
-  void loadIconList() {
+  Future<void> loadIconList() async {
     _iconList = [];
-    _iconList.add(generateIconMenuItem("Phone", Icons.phone_android));
-    _iconList.add(generateIconMenuItem("Payment", Icons.payment));
-    _iconList.add(generateIconMenuItem("Airplane", Icons.airplanemode_active));
-    _iconList.add(generateIconMenuItem("Bank", Icons.account_balance));
-    _iconList.add(generateIconMenuItem("House", Icons.home));
-    _iconList.add(generateIconMenuItem("Money", Icons.attach_money));
-    _iconList.add(generateIconMenuItem("Beach", Icons.beach_access));
-    _iconList.add(generateIconMenuItem("Video Game", Icons.videogame_asset));
-    _iconList.add(generateIconMenuItem("Book", Icons.book));
-    _iconList.add(generateIconMenuItem("Membership", Icons.card_membership));
-    _iconList.add(generateIconMenuItem("Travel", Icons.card_travel));
-    _iconList.add(generateIconMenuItem("Gambling", Icons.casino));
-    _iconList.add(generateIconMenuItem("Transit", Icons.directions_transit));
+    String iconJson = await rootBundle.loadString('assets/icons.json');
+    List<Map> iconList = (jsonDecode(iconJson) as List<dynamic>).cast<Map>();
+    iconList.map((Map map) {
+      _iconList.add(generateIconMenuItem(map["name"], IconData(map["code"], fontFamily: map["font"])));
+    });
+
+    print(iconList.toString());
+
+//    _iconList.add(generateIconMenuItem("Phone", Icons.phone_android));
+//    _iconList.add(generateIconMenuItem("Payment", Icons.payment));
+//    _iconList.add(generateIconMenuItem("Airplane", Icons.airplanemode_active));
+//    _iconList.add(generateIconMenuItem("Bank", Icons.account_balance));
+//    _iconList.add(generateIconMenuItem("House", Icons.home));
+//    _iconList.add(generateIconMenuItem("Money", Icons.attach_money));
+//    _iconList.add(generateIconMenuItem("Beach", Icons.beach_access));
+//    _iconList.add(generateIconMenuItem("Video Game", Icons.videogame_asset));
+//    _iconList.add(generateIconMenuItem("Book", Icons.book));
+//    _iconList.add(generateIconMenuItem("Membership", Icons.card_membership));
+//    _iconList.add(generateIconMenuItem("Travel", Icons.card_travel));
+//    _iconList.add(generateIconMenuItem("Gambling", Icons.casino));
+//    _iconList.add(generateIconMenuItem("Transit", Icons.directions_transit));
   }
 
   DropdownMenuItem<Color> generateColorMenuItem(String text, Color value) {

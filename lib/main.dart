@@ -20,6 +20,25 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         primaryColor: Color(0xFFF9AA33),
+        scaffoldBackgroundColor: Colors.white,
+        bottomAppBarTheme: BottomAppBarTheme(
+          shape: const CircularNotchedRectangle(),
+          elevation: 0.0,
+          color: Color(0xFF232F34),
+        ),
+        cardTheme: CardTheme(
+          elevation: 0.0,
+          color: Colors.transparent,
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: Color(0xFFF9AA33),
+          foregroundColor: Colors.black,
+        ),
+      ),
+      darkTheme: ThemeData(
+        primaryTextTheme: TextTheme(headline6: TextStyle(color: Colors.white)),
+        primaryIconTheme: IconThemeData(color: Colors.white),
+        primaryColor: Colors.black,
         scaffoldBackgroundColor: Color(0xFF344955),
         bottomAppBarTheme: BottomAppBarTheme(
           shape: const CircularNotchedRectangle(),
