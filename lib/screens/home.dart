@@ -96,22 +96,25 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: StreamBuilder<List<Payment>>(
-        stream: InheritedData.of(context).dueDateBloc.payments,
-        initialData: [],
-        builder: (BuildContext context, AsyncSnapshot<List<Payment>> snapshot) {
-          if (snapshot.hasData) {
-            return mainListView(context, snapshot.data);
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text("Error: ${snapshot.error.toString()}"),
-            );
-          } else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
+      body: SafeArea(
+        child: StreamBuilder<List<Payment>>(
+          stream: InheritedData.of(context).dueDateBloc.payments,
+          initialData: [],
+          builder:
+              (BuildContext context, AsyncSnapshot<List<Payment>> snapshot) {
+            if (snapshot.hasData) {
+              return mainListView(context, snapshot.data);
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Text("Error: ${snapshot.error.toString()}"),
+              );
+            } else {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+          },
+        ),
       ),
       bottomNavigationBar: BottomAppBar(
         child: Row(
