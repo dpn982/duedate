@@ -2,9 +2,15 @@ import 'package:duedate/db/due_date_bloc.dart';
 import 'package:duedate/screens/home.dart';
 import 'package:duedate/widgets/dd_inheritedwidget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+  SystemChrome.setEnabledSystemUIOverlays([]);
   runApp(MyApp(
     dueDateBloc: DueDateBloc(),
   ));

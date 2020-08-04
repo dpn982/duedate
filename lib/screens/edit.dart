@@ -32,7 +32,6 @@ class _EditScreenState extends State<EditScreen> {
       color: Colors.black,
     ),
   );
-  static const EdgeInsetsGeometry fieldPadding = EdgeInsets.only(bottom: 15.0);
 
   @override
   void initState() {
@@ -115,7 +114,8 @@ class _EditScreenState extends State<EditScreen> {
     String iconJson = await rootBundle.loadString('assets/icons.json');
     List<Map> iconList = (jsonDecode(iconJson) as List<dynamic>).cast<Map>();
     iconList.map((Map map) {
-      _iconList.add(generateIconMenuItem(map["name"], IconData(map["code"], fontFamily: map["font"])));
+      _iconList.add(generateIconMenuItem(
+          map["name"], IconData(map["code"], fontFamily: map["font"])));
     });
 
     print(iconList.toString());

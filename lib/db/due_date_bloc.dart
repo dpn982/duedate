@@ -19,7 +19,7 @@ class DueDateBloc {
 
   DueDateBloc() {
     _loadAndPopulateStream();
-    
+
     _filterTypeController.stream.listen((filterType) {
       _loadAndPopulateStream(filterType: filterType);
     });
@@ -71,5 +71,10 @@ class DueDateBloc {
 
   Future<Null> _updatePayment(Payment payment) async {
     await _paymentDAO.update(payment);
+  }
+
+  void close() {
+    _crudPaymentController.close();
+    _filterTypeController.close();
   }
 }

@@ -1,7 +1,6 @@
 import 'package:duedate/db/search_bloc.dart';
 import 'package:duedate/models/payment.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 
 class DueDateSearch extends SearchDelegate<Payment> {
   final SearchBloc searchBloc = SearchBloc();
@@ -23,6 +22,7 @@ class DueDateSearch extends SearchDelegate<Payment> {
     return IconButton(
       icon: Icon(Icons.arrow_back),
       onPressed: () {
+        searchBloc.close();
         close(context, null);
       },
     );
@@ -31,7 +31,6 @@ class DueDateSearch extends SearchDelegate<Payment> {
   @override
   Widget buildResults(BuildContext context) {
     searchBloc.searchTerm.add(query);
-
 
     return StreamBuilder(
       stream: searchBloc.searchResults,
@@ -55,7 +54,6 @@ class DueDateSearch extends SearchDelegate<Payment> {
             ],
           );
         } else {
-          var results = snapshot.data;
           return ListView.builder(
             itemCount: snapshot.data.length,
             itemBuilder: (context, index) {
@@ -65,7 +63,8 @@ class DueDateSearch extends SearchDelegate<Payment> {
                   child: ListTile(
                     title: Text(result.name),
                     onTap: () {
-
+                      searchBloc.close();
+                      close(context, result);
                     },
                   ),
                 ),
@@ -79,6 +78,50 @@ class DueDateSearch extends SearchDelegate<Payment> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return Container();
+    searchBloc.searchTerm.add(query);
+
+    return StreamBuilder(
+      stream: searchBloc.searchResults,
+      builder: (context, AsyncSnapshot<List<Payment>> snapshot) {
+        if (!snapshot.hasData) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Center(child: CircularProgressIndicator()),
+            ],
+          );
+        } else if (snapshot.data.length == 0) {
+          return Column(
+            children: <Widget>[
+              Center(
+                child: Text(
+                  "No Results Found.",
+                ),
+              ),
+            ],
+          );
+        } else {
+          return ListView.builder(
+            itemCount: snapshot.data.length,
+            itemBuilder: (context, index) {
+              var result = snapshot.data[index];
+              return Container(
+                child: Card(
+                  child: ListTile(
+                    leading: Icon(Icons.bookmark),
+                    title: Text(result.name),
+                    onTap: () {
+                      searchBloc.close();
+                      close(context, result);
+                    },
+                  ),
+                ),
+              );
+            },
+          );
+        }
+      },
+    );
   }
 }

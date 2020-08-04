@@ -29,4 +29,9 @@ class SearchBloc {
   Future<Null> _loadSearchResults(query) async {
     _searchResults = await _paymentDAO.getPaymentsByName(query);
   }
+
+  void close() {
+    _paymentsSearchSubject.close();
+    _searchTermController.close();
+  }
 }

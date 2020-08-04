@@ -24,6 +24,12 @@ class _HomeScreenState extends State<HomeScreen> {
     _selectedView = FilterType.UnCompleted;
   }
 
+  @override
+  void dispose() {
+    InheritedData.of(context).dueDateBloc.close();
+    super.dispose();
+  }
+
   CheckedPopupMenuItem<FilterType> _getPopupMenuItem(
       String text, FilterType type) {
     return CheckedPopupMenuItem<FilterType>(
@@ -204,7 +210,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     Icon(
                       _payments[index].icon,
-                      //color: _payments[index].color,
                     ),
                   ],
                 ),
