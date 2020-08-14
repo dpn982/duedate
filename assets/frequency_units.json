@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Seconds",
+    "value": "SECONDS"
+  },
+  {
+    "name": "Minutes",
+    "value": "MINUTES"
+  },
+  {
+    "name": "Hours",
+    "value": "HOURS"
+  },
+  {
+    "name": "Days",
+    "value": "DAYS"
+  },
+  {
+    "name": "Weeks",
+    "value": "WEEKS"
+  },
+  {
+    "name": "Months",
+    "value": "MONTHS"
+  },
+  {
+    "name": "Years",
+    "value": "YEARS"
+  }
+]

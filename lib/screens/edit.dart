@@ -44,7 +44,7 @@ class _EditScreenState extends State<EditScreen> {
         amount: 0.00,
         dueDate: DateTime.now(),
         recurring: false,
-        frequency: null,
+        frequency: 0,
         frequencyUnits: "SECONDS",
         color: Colors.blue[500],
         icon: Icons.payment,
@@ -62,110 +62,92 @@ class _EditScreenState extends State<EditScreen> {
     loadIconList();
   }
 
-  void loadFrequencyUnits() {
+  void loadFrequencyUnits() async {
     _frequencyList = [];
-    _frequencyList.add(DropdownMenuItem(
-      child: Text("Seconds"),
-      value: "SECONDS",
-    ));
-    _frequencyList.add(DropdownMenuItem(
-      child: Text("Minutes"),
-      value: "MINUTES",
-    ));
-    _frequencyList.add(DropdownMenuItem(
-      child: Text("Hours"),
-      value: "HOURS",
-    ));
-    _frequencyList.add(DropdownMenuItem(
-      child: Text("Days"),
-      value: "DAYS",
-    ));
-    _frequencyList.add(DropdownMenuItem(
-      child: Text("Weeks"),
-      value: "WEEKS",
-    ));
-    _frequencyList.add(DropdownMenuItem(
-      child: Text("Months"),
-      value: "MONTHS",
-    ));
-    _frequencyList.add(DropdownMenuItem(
-      child: Text("Years"),
-      value: "YEARS",
-    ));
+    String unitsJson = await rootBundle.loadString('assets/frequency_units.json');
+    List<Map> unitsList = (jsonDecode(unitsJson) as List<dynamic>).cast<Map>();
+
+    setState(() {
+      for (Map mapItem in unitsList) {
+        _frequencyList.add(DropdownMenuItem(
+          child: Text(mapItem["name"]),
+          value: mapItem["value"],
+        ));
+      }
+    });
   }
 
-  void loadColorList() {
+  void loadColorList() async {
     _colorList = [];
-    _colorList.add(generateColorMenuItem("Red", Colors.red[500]));
-    _colorList.add(generateColorMenuItem("Blue", Colors.blue[500]));
-    _colorList.add(generateColorMenuItem("Green", Colors.green[500]));
-    _colorList.add(generateColorMenuItem("Purple", Colors.purple[500]));
-    _colorList.add(generateColorMenuItem("Orange", Colors.orange[500]));
-    _colorList.add(generateColorMenuItem("Yellow", Colors.yellow[500]));
-    _colorList.add(generateColorMenuItem("Pink", Colors.pink[500]));
-    _colorList.add(generateColorMenuItem("Brown", Colors.brown[500]));
-    _colorList.add(generateColorMenuItem("Teal", Colors.teal[500]));
-    _colorList.add(generateColorMenuItem("Indigo", Colors.indigo[500]));
-    _colorList.add(generateColorMenuItem("Amber", Colors.amber[500]));
+    String colorJson = await rootBundle.loadString('assets/colors.json');
+    List<Map> colorList = (jsonDecode(colorJson) as List<dynamic>).cast<Map>();
+
+    setState(
+      () {
+        for (Map mapItem in colorList) {
+          _colorList.add(
+            DropdownMenuItem(
+              child: Row(
+                children: <Widget>[
+                  Container(
+                    width: 15,
+                    height: 15,
+                    color: Color(
+                      int.parse(
+                        mapItem["value"],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Text(mapItem["name"]),
+                ],
+              ),
+              value: Color(
+                int.parse(
+                  mapItem["value"],
+                ),
+              ),
+            ),
+          );
+        }
+      },
+    );
   }
 
   Future<void> loadIconList() async {
     _iconList = [];
     String iconJson = await rootBundle.loadString('assets/icons.json');
     List<Map> iconList = (jsonDecode(iconJson) as List<dynamic>).cast<Map>();
-    iconList.map((Map map) {
-      _iconList.add(generateIconMenuItem(
-          map["name"], IconData(map["code"], fontFamily: map["font"])));
-    });
 
-    print(iconList.toString());
-
-//    _iconList.add(generateIconMenuItem("Phone", Icons.phone_android));
-//    _iconList.add(generateIconMenuItem("Payment", Icons.payment));
-//    _iconList.add(generateIconMenuItem("Airplane", Icons.airplanemode_active));
-//    _iconList.add(generateIconMenuItem("Bank", Icons.account_balance));
-//    _iconList.add(generateIconMenuItem("House", Icons.home));
-//    _iconList.add(generateIconMenuItem("Money", Icons.attach_money));
-//    _iconList.add(generateIconMenuItem("Beach", Icons.beach_access));
-//    _iconList.add(generateIconMenuItem("Video Game", Icons.videogame_asset));
-//    _iconList.add(generateIconMenuItem("Book", Icons.book));
-//    _iconList.add(generateIconMenuItem("Membership", Icons.card_membership));
-//    _iconList.add(generateIconMenuItem("Travel", Icons.card_travel));
-//    _iconList.add(generateIconMenuItem("Gambling", Icons.casino));
-//    _iconList.add(generateIconMenuItem("Transit", Icons.directions_transit));
-  }
-
-  DropdownMenuItem<Color> generateColorMenuItem(String text, Color value) {
-    return DropdownMenuItem(
-      child: Row(
-        children: <Widget>[
-          Container(
-            width: 15,
-            height: 15,
-            color: value,
-          ),
-          SizedBox(
-            width: 10,
-          ),
-          Text(text),
-        ],
-      ),
-      value: value,
-    );
-  }
-
-  DropdownMenuItem<IconData> generateIconMenuItem(String text, IconData value) {
-    return DropdownMenuItem(
-      child: Row(
-        children: <Widget>[
-          Icon(value),
-          SizedBox(
-            width: 10,
-          ),
-          Text(text),
-        ],
-      ),
-      value: value,
+    setState(
+      () {
+        for (Map mapItem in iconList) {
+          _iconList.add(
+            DropdownMenuItem(
+              child: Row(
+                children: <Widget>[
+                  Icon(
+                    IconData(
+                      mapItem["code"],
+                      fontFamily: mapItem["font"],
+                    ),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Text(mapItem["name"]),
+                ],
+              ),
+              value: IconData(
+                mapItem["code"],
+                fontFamily: mapItem["font"],
+              ),
+            ),
+          );
+        }
+      },
     );
   }
 

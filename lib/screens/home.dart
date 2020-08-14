@@ -103,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
           builder:
               (BuildContext context, AsyncSnapshot<List<Payment>> snapshot) {
             if (snapshot.hasData) {
-              return mainListView(context, snapshot.data);
+              return mainListView(context, snapshot.data, slidableController);
             } else if (snapshot.hasError) {
               return Center(
                 child: Text("Error: ${snapshot.error.toString()}"),
@@ -176,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget mainListView(BuildContext context, List<Payment> _payments) {
+  Widget mainListView(BuildContext context, List<Payment> _payments, SlidableController slidableController) {
     Locale _locale = Localizations.localeOf(context);
     NumberFormat _simpleCurrencyFormat =
         NumberFormat.simpleCurrency(locale: _locale.toString());

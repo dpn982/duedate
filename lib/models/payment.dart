@@ -53,7 +53,7 @@ class Payment {
         amount: json["amount"].toDouble(),
         dueDate: DateTime.parse(json["dueDate"]),
         recurring: json["recurring"],
-        frequency: json["frequency"] == null ? null : json["frequency"],
+        frequency: json["frequency"] == null ? 0 : json["frequency"],
         frequencyUnits:
             json["frequencyUnits"] == null ? null : json["frequencyUnits"],
         color: Color(json["color"]),
@@ -81,7 +81,7 @@ class Payment {
         "createdDate": createdDate.toIso8601String(),
         "dueDate": dueDate.toIso8601String(),
         "recurring": recurring,
-        "frequency": frequency == null ? null : frequency,
+        "frequency": frequency == null ? 0 : frequency,
         "frequencyUnits": frequencyUnits == null ? null : frequencyUnits,
         "color": color.value,
         "icon": icon.codePoint,
