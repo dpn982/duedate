@@ -27,6 +27,21 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: Color(0xFFF9AA33),
         scaffoldBackgroundColor: Colors.white,
+        popupMenuTheme: PopupMenuThemeData(
+          color: Color(0xFFF9AA33),
+          textStyle: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: Colors.black,
+              width: 2.0,
+            ),
+            borderRadius: BorderRadius.all(
+              Radius.circular(20.0),
+            ),
+          ),
+        ),
         bottomAppBarTheme: BottomAppBarTheme(
           shape: const CircularNotchedRectangle(),
           elevation: 0.0,
@@ -46,6 +61,21 @@ class MyApp extends StatelessWidget {
         primaryIconTheme: IconThemeData(color: Colors.white),
         primaryColor: Colors.black,
         scaffoldBackgroundColor: Color(0xFF344955),
+        popupMenuTheme: PopupMenuThemeData(
+          color: Color(0xFFF9AA33),
+          textStyle: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: Colors.black,
+              width: 2.0,
+            ),
+            borderRadius: BorderRadius.all(
+              Radius.circular(20.0),
+            ),
+          ),
+        ),
         bottomAppBarTheme: BottomAppBarTheme(
           shape: const CircularNotchedRectangle(),
           elevation: 0.0,

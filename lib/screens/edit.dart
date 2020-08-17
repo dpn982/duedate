@@ -44,8 +44,11 @@ class _EditScreenState extends State<EditScreen> {
         amount: 0.00,
         dueDate: DateTime.now(),
         recurring: false,
+        notification: false,
+        notificationFrequency: 0,
+        notificationFrequencyUnits: "DAYS",
         frequency: 0,
-        frequencyUnits: "SECONDS",
+        frequencyUnits: "DAYS",
         color: Colors.blue[500],
         icon: Icons.payment,
         paymentMethod: "",
@@ -55,6 +58,7 @@ class _EditScreenState extends State<EditScreen> {
         hidden: false,
         completed: false,
         completedDate: null,
+        tags: List<String>(),
       );
     }
     loadFrequencyUnits();
@@ -64,7 +68,8 @@ class _EditScreenState extends State<EditScreen> {
 
   void loadFrequencyUnits() async {
     _frequencyList = [];
-    String unitsJson = await rootBundle.loadString('assets/frequency_units.json');
+    String unitsJson =
+        await rootBundle.loadString('assets/frequency_units.json');
     List<Map> unitsList = (jsonDecode(unitsJson) as List<dynamic>).cast<Map>();
 
     setState(() {
@@ -279,7 +284,7 @@ class _EditScreenState extends State<EditScreen> {
                     setState(() => _dirtyPayment.recurring = val),
               ),
               CustomTextFormField(
-                label: "Frequency",
+                label: "Recurring Frequency",
                 visible: _dirtyPayment.recurring == true,
                 inputType: TextInputType.number,
                 initialValue: _dirtyPayment.frequency.toString(),
@@ -294,14 +299,47 @@ class _EditScreenState extends State<EditScreen> {
                     setState(() => _dirtyPayment.frequency = int.parse(val)),
               ),
               CustomDropdownFormField<String>(
-                label: "Frequency Unis",
+                label: "Recurring Frequency Units",
                 visible: _dirtyPayment.recurring == true,
-                hint: "Select Frequency Units",
+                hint: "",
                 items: _frequencyList,
                 value: _dirtyPayment.frequencyUnits,
                 onChanged: (value) {
                   setState(() {
                     _dirtyPayment.frequencyUnits = value;
+                  });
+                },
+              ),
+              CustomSwitchFormField(
+                label: "Notification",
+                value: _dirtyPayment.notification,
+                onChanged: (bool val) =>
+                    setState(() => _dirtyPayment.notification = val),
+              ),
+              CustomTextFormField(
+                label: "Notification Frequency",
+                visible: _dirtyPayment.notification == true,
+                inputType: TextInputType.number,
+                initialValue: _dirtyPayment.notificationFrequency.toString(),
+                validator: (value) {
+                  if (value.isEmpty && _dirtyPayment.notification == true) {
+                    return 'Please enter a notification frequency.';
+                  }
+
+                  return null;
+                },
+                onSaved: (val) => setState(
+                    () => _dirtyPayment.notificationFrequency = int.parse(val)),
+              ),
+              CustomDropdownFormField<String>(
+                label: "Notification Frequency Units",
+                visible: _dirtyPayment.notification == true,
+                hint: "",
+                items: _frequencyList,
+                value: _dirtyPayment.notificationFrequencyUnits,
+                onChanged: (value) {
+                  setState(() {
+                    _dirtyPayment.notificationFrequencyUnits = value;
                   });
                 },
               ),
@@ -374,6 +412,11 @@ class _EditScreenState extends State<EditScreen> {
                 maxLines: 10,
                 initialValue: _dirtyPayment.notes,
                 onSaved: (val) => setState(() => _dirtyPayment.notes = val),
+              ),
+              CustomTextFormField(
+                label: "Tags",
+                initialValue: _dirtyPayment.tags.join(","),
+                onSaved: (val) => setState(() => _dirtyPayment.tags = val.split(",")),
               ),
             ]),
           ),

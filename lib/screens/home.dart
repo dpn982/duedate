@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return CheckedPopupMenuItem<FilterType>(
       checked: _selectedView == type,
       value: type,
-      child: Text(text, style: TextStyle(fontWeight: FontWeight.bold)),
+      child: Text(text),
     );
   }
 
@@ -122,6 +122,8 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             PopupMenuButton<FilterType>(
+              offset: Offset(0, -300),
+              padding: EdgeInsets.all(0.0),
               onSelected: (value) {
                 _selectedView = value;
                 InheritedData.of(context).dueDateBloc.filterType.add(value);
