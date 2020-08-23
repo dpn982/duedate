@@ -54,7 +54,7 @@ class Payment {
   bool hidden;
   bool completed;
   DateTime completedDate;
-  List<String> tags;
+  List<dynamic> tags;
 
   factory Payment.fromJson(Map<String, dynamic> json) => Payment(
         name: json["name"],
@@ -88,7 +88,7 @@ class Payment {
         completedDate: json["completedDate"] == null
             ? null
             : DateTime.parse(json["completedDate"]),
-        tags: json["tags"] == null ? List<String>() : jsonDecode(json["tags"]),
+        tags: json["tags"] == null ? List<dynamic>() : jsonDecode(json["tags"]),
       );
 
   Map<String, dynamic> toJson() => {

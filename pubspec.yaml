@@ -33,6 +33,7 @@ dependencies:
   path_provider: 1.6.11
   shared_preferences: ^0.5.8
   rxdart: ^0.24.1
+  flutter_local_notifications: ^1.4.4+3
 
 dev_dependencies:
   flutter_test:

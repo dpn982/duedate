@@ -43,6 +43,7 @@ class _CustomDropdownFormFieldState<T> extends State<CustomDropdownFormField<T>>
           items: widget.items,
           decoration: InputDecoration(
             labelText: widget.label,
+            contentPadding: EdgeInsets.all(17.0),
             labelStyle: TextStyle(
               fontSize: 18.0,
               color: Colors.black,

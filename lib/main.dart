@@ -25,6 +25,17 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
+        tabBarTheme: TabBarTheme(
+          indicator: ShapeDecoration(
+            color: Color(0xFFF9AA33),
+            shape: UnderlineInputBorder(
+              borderSide: BorderSide(
+                  color: Colors.black,
+                  width: 10,
+                  style: BorderStyle.solid),
+            ),
+          ),
+        ),
         primaryColor: Color(0xFFF9AA33),
         scaffoldBackgroundColor: Colors.white,
         popupMenuTheme: PopupMenuThemeData(
@@ -41,6 +52,9 @@ class MyApp extends StatelessWidget {
               Radius.circular(20.0),
             ),
           ),
+        ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: Colors.black,
         ),
         bottomAppBarTheme: BottomAppBarTheme(
           shape: const CircularNotchedRectangle(),

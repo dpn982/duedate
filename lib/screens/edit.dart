@@ -5,7 +5,6 @@ import 'package:duedate/widgets/dd_dropdownformfield.dart';
 import 'package:duedate/widgets/dd_switchformfield.dart';
 import 'package:duedate/widgets/dd_textformfield.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 
@@ -193,232 +192,312 @@ class _EditScreenState extends State<EditScreen> {
       }
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_dirtyPayment.name),
-        elevation: 0.0,
-        actions: <Widget>[
-          Padding(
-              padding: EdgeInsets.only(right: 20.0),
-              child: GestureDetector(
-                onTap: () {
-                  final form = _formKey.currentState;
-                  if (form.validate()) {
-                    form.save();
-                    Navigator.pop(context, _dirtyPayment);
-                  }
-                },
-                child: Icon(
-                  Icons.save,
-                  size: 26.0,
-                ),
-              )),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: SingleChildScrollView(
+    return DefaultTabController(
+      length: 4,
+      child: Scaffold(
+        bottomNavigationBar: TabBar(
+          tabs: [
+            Tab(
+              text: "General",
+              icon: Icon(Icons.home),
+            ),
+            Tab(
+              text: "Amount",
+              icon: Icon(Icons.payment),
+            ),
+            Tab(
+              text: "Notification",
+              icon: Icon(Icons.notifications),
+            ),
+            Tab(
+              text: "Extra",
+              icon: Icon(Icons.note),
+            ),
+          ],
+        ),
+        appBar: AppBar(
+          title: Text(_dirtyPayment.name),
+          elevation: 0.0,
+          actions: <Widget>[
+            Padding(
+                padding: EdgeInsets.only(right: 20.0),
+                child: GestureDetector(
+                  onTap: () {
+                    final form = _formKey.currentState;
+                    if (form.validate()) {
+                      form.save();
+                      Navigator.pop(context, _dirtyPayment);
+                    }
+                  },
+                  child: Icon(
+                    Icons.save,
+                    size: 26.0,
+                  ),
+                )),
+          ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(15.0),
           child: Form(
             key: _formKey,
-            child: Column(children: <Widget>[
-              SizedBox(height: 8.0),
-              CustomTextFormField(
-                label: "Name",
-                initialValue: _dirtyPayment.name,
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Please enter a name.';
-                  }
+            child: TabBarView(
+              children: [
+                SingleChildScrollView(
+                  child: Column(
+                      children: <Widget>[
+                        SizedBox(height: 8.0),
+                        CustomTextFormField(
+                          label: "Name",
+                          initialValue: _dirtyPayment.name,
+                          validator: (value) {
+                            if (value.isEmpty) {
+                              return 'Please enter a name.';
+                            }
 
-                  return null;
-                },
-                onSaved: (val) => setState(() => _dirtyPayment.name = val),
-              ),
-              CustomTextFormField(
-                label: "Description",
-                initialValue: _dirtyPayment.description,
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Please enter a description.';
-                  }
+                            return null;
+                          },
+                          onSaved: (val) =>
+                              setState(() => _dirtyPayment.name = val),
+                        ),
+                        CustomTextFormField(
+                          label: "Description",
+                          initialValue: _dirtyPayment.description,
+                          validator: (value) {
+                            if (value.isEmpty) {
+                              return 'Please enter a description.';
+                            }
 
-                  return null;
-                },
-                onSaved: (val) =>
-                    setState(() => _dirtyPayment.description = val),
-              ),
-              CustomTextFormField(
-                label: "Amount",
-                initialValue: _dirtyPayment.amount.toString(),
-                prefixText: _simpleCurrencyFormat.currencySymbol,
-                inputType: TextInputType.number,
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Please enter an amount.';
-                  }
+                            return null;
+                          },
+                          onSaved: (val) =>
+                              setState(() => _dirtyPayment.description = val),
+                        ),
+                        CustomDropdownFormField<Color>(
+                          label: "Color",
+                          hint: "Select Color",
+                          value: _dirtyPayment.color,
+                          items: _colorList,
+                          onChanged: (value) {
+                            setState(() {
+                              _dirtyPayment.color = value;
+                            });
+                          },
+                        ),
+                        CustomDropdownFormField<IconData>(
+                          label: "Icon",
+                          hint: "Select Icon",
+                          items: _iconList,
+                          value: _dirtyPayment.icon,
+                          onChanged: (value) {
+                            setState(() {
+                              _dirtyPayment.icon = value;
+                            });
+                          },
+                        ),
+                      ]),
+                ),
+                SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      SizedBox(height: 8.0),
+                      CustomTextFormField(
+                        label: "Amount",
+                        initialValue: _dirtyPayment.amount.toString(),
+                        prefixText: _simpleCurrencyFormat.currencySymbol,
+                        inputType: TextInputType.number,
+                        validator: (value) {
+                          if (value.isEmpty) {
+                            return 'Please enter an amount.';
+                          }
 
-                  return null;
-                },
-                onSaved: (val) =>
-                    setState(() => _dirtyPayment.amount = double.parse(val)),
-              ),
-              CustomTextFormField(
-                label: "Due Date",
-                inputType: TextInputType.datetime,
-                controller: dueDateCtl,
-                onTap: () => _selectDueDate(context),
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Please enter a due date.';
-                  }
+                          return null;
+                        },
+                        onSaved: (val) => setState(
+                            () => _dirtyPayment.amount = double.parse(val)),
+                      ),
+                      CustomTextFormField(
+                        label: "Due Date",
+                        inputType: TextInputType.datetime,
+                        controller: dueDateCtl,
+                        onTap: () => _selectDueDate(context),
+                        validator: (value) {
+                          if (value.isEmpty) {
+                            return 'Please enter a due date.';
+                          }
 
-                  return null;
-                },
-                onSaved: (val) =>
-                    setState(() => _dirtyPayment.dueDate = DateTime.parse(val)),
-              ),
-              CustomSwitchFormField(
-                label: "Recurring Payment",
-                value: _dirtyPayment.recurring,
-                onChanged: (bool val) =>
-                    setState(() => _dirtyPayment.recurring = val),
-              ),
-              CustomTextFormField(
-                label: "Recurring Frequency",
-                visible: _dirtyPayment.recurring == true,
-                inputType: TextInputType.number,
-                initialValue: _dirtyPayment.frequency.toString(),
-                validator: (value) {
-                  if (value.isEmpty && _dirtyPayment.recurring == true) {
-                    return 'Please enter a frequency.';
-                  }
+                          return null;
+                        },
+                        onSaved: (val) => setState(
+                            () => _dirtyPayment.dueDate = DateTime.parse(val)),
+                      ),
+                      CustomSwitchFormField(
+                        label: "Recurring Payment",
+                        value: _dirtyPayment.recurring,
+                        onChanged: (bool val) =>
+                            setState(() => _dirtyPayment.recurring = val),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: CustomTextFormField(
+                              label: "Recurring Frequency",
+                              visible: _dirtyPayment.recurring == true,
+                              inputType: TextInputType.number,
+                              initialValue: _dirtyPayment.frequency.toString(),
+                              validator: (value) {
+                                if (value.isEmpty &&
+                                    _dirtyPayment.recurring == true) {
+                                  return 'Please enter a frequency.';
+                                }
 
-                  return null;
-                },
-                onSaved: (val) =>
-                    setState(() => _dirtyPayment.frequency = int.parse(val)),
-              ),
-              CustomDropdownFormField<String>(
-                label: "Recurring Frequency Units",
-                visible: _dirtyPayment.recurring == true,
-                hint: "",
-                items: _frequencyList,
-                value: _dirtyPayment.frequencyUnits,
-                onChanged: (value) {
-                  setState(() {
-                    _dirtyPayment.frequencyUnits = value;
-                  });
-                },
-              ),
-              CustomSwitchFormField(
-                label: "Notification",
-                value: _dirtyPayment.notification,
-                onChanged: (bool val) =>
-                    setState(() => _dirtyPayment.notification = val),
-              ),
-              CustomTextFormField(
-                label: "Notification Frequency",
-                visible: _dirtyPayment.notification == true,
-                inputType: TextInputType.number,
-                initialValue: _dirtyPayment.notificationFrequency.toString(),
-                validator: (value) {
-                  if (value.isEmpty && _dirtyPayment.notification == true) {
-                    return 'Please enter a notification frequency.';
-                  }
+                                return null;
+                              },
+                              onSaved: (val) => setState(() =>
+                                  _dirtyPayment.frequency = int.parse(val)),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 25,
+                          ),
+                          SizedBox(
+                            width: 150,
+                            child: CustomDropdownFormField<String>(
+                              label: "",
+                              visible: _dirtyPayment.recurring == true,
+                              hint: "",
+                              items: _frequencyList,
+                              value: _dirtyPayment.frequencyUnits,
+                              onChanged: (value) {
+                                setState(() {
+                                  _dirtyPayment.frequencyUnits = value;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      CustomTextFormField(
+                        label: "Payment Method",
+                        initialValue: _dirtyPayment.paymentMethod,
+                        validator: (value) {
+                          if (value.isEmpty) {
+                            return 'Please enter a payment method.';
+                          }
 
-                  return null;
-                },
-                onSaved: (val) => setState(
-                    () => _dirtyPayment.notificationFrequency = int.parse(val)),
-              ),
-              CustomDropdownFormField<String>(
-                label: "Notification Frequency Units",
-                visible: _dirtyPayment.notification == true,
-                hint: "",
-                items: _frequencyList,
-                value: _dirtyPayment.notificationFrequencyUnits,
-                onChanged: (value) {
-                  setState(() {
-                    _dirtyPayment.notificationFrequencyUnits = value;
-                  });
-                },
-              ),
-              CustomDropdownFormField<Color>(
-                label: "Color",
-                hint: "Select Color",
-                value: _dirtyPayment.color,
-                items: _colorList,
-                onChanged: (value) {
-                  setState(() {
-                    _dirtyPayment.color = value;
-                  });
-                },
-              ),
-              CustomDropdownFormField<IconData>(
-                label: "Icon",
-                hint: "Select Icon",
-                items: _iconList,
-                value: _dirtyPayment.icon,
-                onChanged: (value) {
-                  setState(() {
-                    _dirtyPayment.icon = value;
-                  });
-                },
-              ),
-              CustomTextFormField(
-                label: "Payment Method",
-                initialValue: _dirtyPayment.paymentMethod,
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Please enter a payment method.';
-                  }
+                          return null;
+                        },
+                        onSaved: (val) =>
+                            setState(() => _dirtyPayment.paymentMethod = val),
+                      ),
+                      CustomSwitchFormField(
+                        label: "Completed",
+                        value: _dirtyPayment.completed,
+                        onChanged: (bool val) =>
+                            setState(() => _dirtyPayment.completed = val),
+                      ),
+                      CustomTextFormField(
+                        label: "Completed Date",
+                        visible: _dirtyPayment.completed == true,
+                        inputType: TextInputType.datetime,
+                        controller: completedDateCtl,
+                        onTap: () => _selectCompletedDate(context),
+                        validator: (value) {
+                          if (value.isEmpty && _dirtyPayment.completed) {
+                            return 'Please enter a due date.';
+                          }
 
-                  return null;
-                },
-                onSaved: (val) =>
-                    setState(() => _dirtyPayment.paymentMethod = val),
-              ),
-              CustomSwitchFormField(
-                label: "Hidden",
-                value: _dirtyPayment.hidden,
-                onChanged: (bool val) =>
-                    setState(() => _dirtyPayment.hidden = val),
-              ),
-              CustomSwitchFormField(
-                label: "Completed",
-                value: _dirtyPayment.completed,
-                onChanged: (bool val) =>
-                    setState(() => _dirtyPayment.completed = val),
-              ),
-              CustomTextFormField(
-                label: "Completed Date",
-                visible: _dirtyPayment.completed == true,
-                inputType: TextInputType.datetime,
-                controller: completedDateCtl,
-                onTap: () => _selectCompletedDate(context),
-                validator: (value) {
-                  if (value.isEmpty && _dirtyPayment.completed) {
-                    return 'Please enter a due date.';
-                  }
+                          return null;
+                        },
+                        onSaved: (val) => setState(() =>
+                            _dirtyPayment.completedDate = DateTime.parse(val)),
+                      ),
+                    ],
+                  ),
+                ),
+                SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      SizedBox(height: 8.0),
+                      CustomSwitchFormField(
+                        label: "Enable Notifications",
+                        value: _dirtyPayment.notification,
+                        onChanged: (bool val) =>
+                            setState(() => _dirtyPayment.notification = val),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: CustomTextFormField(
+                              label: "",
+                              inputType: TextInputType.number,
+                              initialValue: _dirtyPayment.notificationFrequency
+                                  .toString(),
+                              validator: (value) {
+                                if (value.isEmpty) {
+                                  return 'Please enter a notification frequency.';
+                                }
 
-                  return null;
-                },
-                onSaved: (val) => setState(
-                    () => _dirtyPayment.completedDate = DateTime.parse(val)),
-              ),
-              CustomTextFormField(
-                label: "Notes",
-                inputType: TextInputType.multiline,
-                maxLines: 10,
-                initialValue: _dirtyPayment.notes,
-                onSaved: (val) => setState(() => _dirtyPayment.notes = val),
-              ),
-              CustomTextFormField(
-                label: "Tags",
-                initialValue: _dirtyPayment.tags.join(","),
-                onSaved: (val) => setState(() => _dirtyPayment.tags = val.split(",")),
-              ),
-            ]),
+                                return null;
+                              },
+                              onSaved: (val) => setState(() => _dirtyPayment
+                                  .notificationFrequency = int.parse(val)),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 25,
+                          ),
+                          SizedBox(
+                            width: 150,
+                            child: CustomDropdownFormField<String>(
+                              label: "",
+                              hint: "",
+                              items: _frequencyList,
+                              value: _dirtyPayment.notificationFrequencyUnits,
+                              onChanged: (value) {
+                                setState(() {
+                                  _dirtyPayment.notificationFrequencyUnits =
+                                      value;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      CustomSwitchFormField(
+                        label: "Hidden",
+                        value: _dirtyPayment.hidden,
+                        onChanged: (bool val) =>
+                            setState(() => _dirtyPayment.hidden = val),
+                      ),
+                      CustomTextFormField(
+                        label: "Notes",
+                        inputType: TextInputType.multiline,
+                        maxLines: 10,
+                        initialValue: _dirtyPayment.notes,
+                        onSaved: (val) =>
+                            setState(() => _dirtyPayment.notes = val),
+                      ),
+                      CustomTextFormField(
+                        label: "Tags",
+                        initialValue: _dirtyPayment.tags.join(","),
+                        onSaved: (val) =>
+                            setState(() => _dirtyPayment.tags = val.split(",")),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
